@@ -47,3 +47,30 @@ To hit the Day 3 demo, your Lead AI Engineer must do these three things today:
 Environment: Set up a local Python/Swift environment with LlamaIndex or LangChain for mobile.
 Vector Store: Ingest 5 key Menopause Guidelines (PDFs) into a local FAISS index.
 UI: Draft the "Daily Pulse" HUD in a low-fidelity wireframe so it can be made interactive by Day 3.
+
+
+
+
+"""
+# 1. Add navigation button on home page
+if st.button("New Feature", key="btn_new"):
+    go_to_page("new_feature")
+    st.rerun()
+
+# 2. Create render function
+def render_new_feature():
+    # Header with back button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        if st.button("← Back", key="back_new"):
+            go_home()
+            st.rerun()
+    
+    # Your page content here
+    st.markdown('<div class="page-title">New Feature</div>', unsafe_allow_html=True)
+
+# 3. Add to router
+elif st.session_state.page == "new_feature":
+    render_new_feature()
+"""
+
