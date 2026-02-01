@@ -1,99 +1,325 @@
-import os
-import subprocess
+"""
+MedGemma RAG Logic Module
+Handles ChromaDB retrieval and Ollama LLM calls.
+"""
+
 import time
+import subprocess
 import requests
 import chromadb
 from chromadb.utils import embedding_functions
 import streamlit as st
+import logging
 
-# Config Constants
-DB_PATH = "./user_med_db"
-MODEL_NAME = "all-MiniLM-L6-v2"
-OLLAMA_URL = "http://localhost:11434/api/tags"
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ============================================================================
+# Configuration
+# ============================================================================
 
 
-def is_ollama_running():
-    """Checks if the Ollama server is responding."""
+class Config:
+    DB_PATH = "./user_med_db"
+    COLLECTION_NAME = "medical_docs"
+    EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Must match import script!
+    LLM_MODEL = "tiny-medgemma"  # Or "tiny-medgemma" - be consistent
+    OLLAMA_BASE_URL = "http://localhost:11434"
+    OLLAMA_TIMEOUT = 60
+    RAG_TOP_K = 3
+
+
+# ============================================================================
+# Ollama Management
+# ============================================================================
+
+
+def is_ollama_running() -> bool:
+    """Check if Ollama server is responding."""
     try:
-        response = requests.get(OLLAMA_URL, timeout=2)
+        response = requests.get(f"{Config.OLLAMA_BASE_URL}/api/tags", timeout=2)
         return response.status_code == 200
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException:
         return False
 
 
-def start_ollama():
-    """Starts the Ollama server in the background if it's not running."""
+def is_model_available(model_name: str) -> bool:
+    """Check if specific model is loaded in Ollama."""
+    try:
+        response = requests.get(f"{Config.OLLAMA_BASE_URL}/api/tags", timeout=5)
+        if response.status_code == 200:
+            models = response.json().get("models", [])
+            return any(m.get("name", "").startswith(model_name) for m in models)
+    except requests.exceptions.RequestException:
+        pass
+    return False
+
+
+def start_ollama() -> str:
+    """Start Ollama server if not running."""
     if is_ollama_running():
-        return "Ollama is already running."
+        return "✓ Ollama already running"
 
     try:
-        # Popen runs it in the background so it doesn't block your Python script
         subprocess.Popen(
             ["ollama", "serve"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            start_new_session=True,  # Keeps it running even if the script closes
+            start_new_session=True,
         )
-        # Give it a few seconds to initialize
-        for _ in range(5):
+
+        for i in range(10):  # Wait up to 10 seconds
             if is_ollama_running():
-                return "Ollama started successfully!"
+                return "✓ Ollama started"
             time.sleep(1)
-        return "Ollama is taking a while to start..."
+
+        return "⚠ Ollama starting slowly..."
+    except FileNotFoundError:
+        return "✗ Ollama not installed"
     except Exception as e:
-        return f"Failed to start Ollama: {e}"
+        return f"✗ Failed to start Ollama: {e}"
 
 
-# (Keep your existing imports in med_logic.py)
-
-
-@st.cache_resource
-def auto_boot_system():
-    """
-    This function will run ONCE when the app starts.
-    It ensures Ollama is up and ready.
-    """
-    if not is_ollama_running():
-        status = start_ollama()
-        # Optional: Pre-warm the model by calling it once
-        # requests.post("http://localhost:11434/api/show", json={"name": "medgemma"})
-        return f"System Initialized: {status}"
-    return "System Online (Ollama already running)"
-
-
-def query_knowledge_base(query):
-    """Fetches top 3 chunks from ChromaDB."""
-    client = chromadb.PersistentClient(path=DB_PATH)
-    embedding_model = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name=MODEL_NAME
-    )
-    collection = client.get_collection(
-        name="medical_docs", embedding_function=embedding_model
-    )
-
-    results = collection.query(query_texts=[query], n_results=3)
-    # Combine text and sources for better UI display
-    context = "\n---\n".join(results["documents"][0])
-    sources = list(set([m["source"] for m in results["metadatas"][0]]))
-    return context, sources
-
-
-def call_medgemma(prompt):
-    # This is where the 'Personality' lives
-    system_instruction = (
-        "You are Dr. Selene, an empathetic and highly knowledgeable menopause specialist. "
-        "Your tone is supportive, grounded, and clinical yet accessible. "
-        "Always prioritize safety and mention when findings are from recent 2024/2025 research."
-    )
-
-    full_payload = f"{system_instruction}\n\nContext and Question:\n{prompt}"
+def pull_model_if_needed(model_name: str) -> str:
+    """Ensure model is available, pull if not."""
+    if is_model_available(model_name):
+        return f"✓ Model '{model_name}' ready"
 
     try:
+        # Trigger model pull (this can take a while)
         response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={"model": "medgemma", "prompt": full_payload, "stream": False},
-            timeout=90,
+            f"{Config.OLLAMA_BASE_URL}/api/pull",
+            json={"name": model_name},
+            timeout=300,  # 5 min for large models
         )
-        return response.json().get("response", "No response content.")
+        if response.status_code == 200:
+            return f"✓ Model '{model_name}' pulled"
+        return f"⚠ Model pull returned status {response.status_code}"
     except Exception as e:
-        return f"Request failed: {e}"
+        return f"✗ Failed to pull model: {e}"
+
+
+# ============================================================================
+# ChromaDB - Cached for Performance
+# ============================================================================
+
+
+@st.cache_resource(show_spinner=False)
+def get_chroma_collection():
+    """
+    Initialize ChromaDB client and collection ONCE.
+    Cached by Streamlit to avoid reloading on every query.
+    """
+    try:
+        client = chromadb.PersistentClient(path=Config.DB_PATH)
+
+        embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+            model_name=Config.EMBEDDING_MODEL
+        )
+
+        collection = client.get_collection(
+            name=Config.COLLECTION_NAME, embedding_function=embedding_fn
+        )
+
+        doc_count = collection.count()
+        logger.info(
+            f"ChromaDB loaded: {doc_count} documents in '{Config.COLLECTION_NAME}'"
+        )
+
+        return collection, None
+
+    except Exception as e:
+        logger.error(f"ChromaDB initialization failed: {e}")
+        return None, str(e)
+
+
+# ============================================================================
+# System Initialization
+# ============================================================================
+
+
+@st.cache_resource(show_spinner=False)
+def initialize_system():
+    """
+    One-time system initialization on app startup.
+    Returns status dict for UI display.
+    """
+    status = {
+        "ollama": start_ollama(),
+        "model": "checking...",
+        "database": "checking...",
+    }
+
+    # Check model
+    if is_ollama_running():
+        if is_model_available(Config.LLM_MODEL):
+            status["model"] = f"✓ {Config.LLM_MODEL} ready"
+        else:
+            status["model"] = (
+                f"⚠ {Config.LLM_MODEL} not found - run: ollama pull {Config.LLM_MODEL}"
+            )
+    else:
+        status["model"] = "✗ Ollama not running"
+
+    # Check database
+    collection, error = get_chroma_collection()
+    if collection:
+        status["database"] = f"✓ {collection.count()} documents loaded"
+    else:
+        status["database"] = f"✗ Database error: {error}"
+
+    return status
+
+
+# ============================================================================
+# RAG Functions
+# ============================================================================
+
+
+def query_knowledge_base(
+    query: str, top_k: int = None
+) -> tuple[str, list[str], list[dict]]:
+    """
+    Query ChromaDB for relevant documents.
+
+    Returns:
+        (context_text, source_list, full_results)
+    """
+    top_k = top_k or Config.RAG_TOP_K
+
+    collection, error = get_chroma_collection()
+
+    if collection is None:
+        return "", [], {"error": error}
+
+    if collection.count() == 0:
+        return "", [], {"error": "Database is empty"}
+
+    try:
+        results = collection.query(
+            query_texts=[query], n_results=min(top_k, collection.count())
+        )
+
+        documents = results["documents"][0] if results["documents"] else []
+        metadatas = results["metadatas"][0] if results["metadatas"] else []
+        distances = results["distances"][0] if results["distances"] else []
+
+        # Combine documents into context
+        context = "\n\n---\n\n".join(documents)
+
+        # Extract unique sources
+        sources = list(set(m.get("source", "Unknown") for m in metadatas))
+
+        # Full results for UI
+        full_results = [
+            {
+                "text": doc,
+                "source": meta.get("source", "Unknown"),
+                "distance": dist,
+                "metadata": meta,
+            }
+            for doc, meta, dist in zip(documents, metadatas, distances)
+        ]
+
+        return context, sources, full_results
+
+    except Exception as e:
+        logger.error(f"Query failed: {e}")
+        return "", [], {"error": str(e)}
+
+
+def call_medgemma(prompt: str, context: str = "", stream: bool = False):
+    """
+    Call MedGemma via Ollama API.
+
+    Args:
+        prompt: User's question
+        context: RAG context from ChromaDB
+        stream: If True, yields chunks for streaming UI
+    """
+    system_instruction = """You are Dr. Selene, an empathetic and highly knowledgeable menopause specialist.
+
+Your approach:
+- Supportive, grounded, and clinical yet accessible tone
+- Always prioritize patient safety
+- Cite when findings are from recent 2024/2025 research
+- If uncertain, acknowledge limitations and recommend consulting a healthcare provider
+- Structure responses clearly with bullet points when appropriate
+- Keep up to 5 sentences in your response"""
+
+    if context:
+        full_prompt = f"""Using the following research context:
+
+{context}
+
+---
+
+Patient Question: {prompt}
+
+Please provide a helpful, evidence-based response:"""
+    else:
+        full_prompt = f"""Patient Question: {prompt}
+
+Note: No specific research context available for this query. Please provide general guidance and recommend consulting recent literature or a healthcare provider for specific advice."""
+
+    payload = {
+        "model": Config.LLM_MODEL,
+        "prompt": full_prompt,
+        "system": system_instruction,
+        "stream": stream,
+        "options": {
+            "temperature": 0.7,
+            "top_p": 0.9,
+        },
+    }
+
+    try:
+        if stream:
+            # Streaming response
+            response = requests.post(
+                f"{Config.OLLAMA_BASE_URL}/api/generate",
+                json=payload,
+                stream=True,
+                timeout=Config.OLLAMA_TIMEOUT,
+            )
+
+            for line in response.iter_lines():
+                if line:
+                    import json
+
+                    chunk = json.loads(line)
+                    if "response" in chunk:
+                        yield chunk["response"]
+                    if chunk.get("done"):
+                        break
+        else:
+            # Non-streaming
+            response = requests.post(
+                f"{Config.OLLAMA_BASE_URL}/api/generate",
+                json=payload,
+                timeout=Config.OLLAMA_TIMEOUT,
+            )
+
+            if response.status_code == 200:
+                return response.json().get("response", "No response generated.")
+            else:
+                return f"Error: Ollama returned status {response.status_code}"
+
+    except requests.exceptions.Timeout:
+        error_msg = "Request timed out. The model may be overloaded."
+        if stream:
+            yield error_msg
+        else:
+            return error_msg
+    except requests.exceptions.ConnectionError:
+        error_msg = "Cannot connect to Ollama. Is it running?"
+        if stream:
+            yield error_msg
+        else:
+            return error_msg
+    except Exception as e:
+        error_msg = f"Error: {str(e)}"
+        if stream:
+            yield error_msg
+        else:
+            return error_msg

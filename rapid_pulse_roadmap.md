@@ -1,3 +1,7 @@
+source med_env/bin/activate
+
+ollama run tiny-medgemma
+
 Week 1: The "Visual Engine" (Privacy & Knowledge)
 Goal: Create a working local chat that "reads" scientific papers without the internet.
 Days 1–3: The "Local-First" Shell & Privacy Core
