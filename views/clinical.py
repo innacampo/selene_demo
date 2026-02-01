@@ -1,4 +1,7 @@
 import streamlit as st
+import streamlit.components.v1 as components
+from fpdf import FPDF
+import base64
 from navigation import render_header_with_back
 
 
@@ -32,6 +35,90 @@ SUMMARY_CARDS = [
 ]
 
 
+def _clean_html_content(content: str) -> str:
+    """Remove HTML tags and convert to plain text."""
+    content = content.replace("<strong>", "").replace("</strong>", "")
+    content = content.replace("<br>", "\n")
+    content = content.replace("•", "-")
+    return content.strip()
+
+
+def generate_pdf() -> bytes:
+    """Generate PDF from summary cards."""
+    pdf = FPDF()
+    pdf.add_page()
+
+    # Title
+    pdf.set_font("Arial", "B", 20)
+    pdf.cell(0, 15, "Clinical Summary", ln=True, align="C")
+    pdf.ln(5)
+
+    # Date
+    from datetime import datetime
+
+    pdf.set_font("Arial", "I", 10)
+    pdf.cell(
+        0, 10, f"Generated: {datetime.now().strftime('%B %d, %Y')}", ln=True, align="C"
+    )
+    pdf.ln(10)
+
+    # Summary cards
+    for card in SUMMARY_CARDS:
+        # Card title
+        pdf.set_font("Arial", "B", 14)
+        pdf.set_fill_color(240, 240, 240)
+        pdf.cell(0, 10, card["title"], ln=True, fill=True)
+
+        # Card content
+        pdf.set_font("Arial", "", 11)
+        content = _clean_html_content(card["content"])
+        pdf.multi_cell(0, 7, content)
+        pdf.ln(8)
+
+    # Footer
+    pdf.ln(10)
+    pdf.set_font("Arial", "I", 9)
+    pdf.cell(
+        0,
+        10,
+        "This summary is for informational purposes. Please consult your healthcare provider.",
+        ln=True,
+        align="C",
+    )
+
+    return bytes(pdf.output())
+
+
+def open_pdf_in_new_tab(pdf_bytes: bytes):
+    """Open PDF in a new browser tab using JavaScript."""
+    base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    # JavaScript to open PDF in new tab
+    pdf_js = f"""
+        <script>
+            const pdfData = "data:application/pdf;base64,{base64_pdf}";
+            const newWindow = window.open();
+            if (newWindow) {{
+                newWindow.document.write(`
+                    <html>
+                        <head><title>Clinical Summary</title></head>
+                        <body style="margin:0;padding:0;">
+                            <embed width="100%" height="100%" src="${{pdfData}}" type="application/pdf">
+                        </body>
+                    </html>
+                `);
+            }} else {{
+                // Fallback: trigger download if popup blocked
+                const link = document.createElement('a');
+                link.href = pdfData;
+                link.download = 'clinical_summary.pdf';
+                link.click();
+            }}
+        </script>
+    """
+    components.html(pdf_js, height=0, width=0)
+
+
 def _render_summary_card(title: str, content: str):
     """Render a single summary card."""
     st.markdown(
@@ -62,4 +149,5 @@ def render_clinical():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Export for Doctor", key="export", use_container_width=True):
-            st.success("Summary exported successfully!")
+            pdf_bytes = generate_pdf()
+            open_pdf_in_new_tab(pdf_bytes)
