@@ -1,9 +1,9 @@
 {
-  "stage": "late_postmenopause",
-  "stage_title": "The New Plateau (Late Postmenopause)",
+  "stage": "steady_state",
+  "stage_title": "The Steady State (Late Reproductive)",
   "neuro_symptoms": [
     "word_search"
   ],
-  "created_at": "2026-02-02T08:39:09.165758",
-  "last_updated": "2026-02-02T08:39:09.165764"
+  "created_at": "2026-02-03T12:34:09.955157",
+  "last_updated": "2026-02-03T12:34:09.955164"
 }

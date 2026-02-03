@@ -41,33 +41,18 @@ def profile_exists() -> bool:
 # Stage Definitions
 # ============================================================================
 
-STAGES = {
-    "steady_state": {
-        "title": "The Steady State (Late Reproductive)",
-        "cycle": "Your periods are still regular, but you may notice subtle changes (e.g., the cycle is 2-3 days shorter than it used to be).",
-        "science": "Ovarian reserve is beginning to decline. Your brain is working harder to signal the ovaries, leading to early spikes in FSH (Follicle-Stimulating Hormone).",
-    },
-    "early_transition": {
-        "title": "The Great Fluctuation (Early Transition)",
-        "cycle": "You've noticed a persistent difference in cycle length (7 days or more difference between consecutive cycles). You might have skipped one period.",
-        "science": 'This is the onset of "true" perimenopause. Estrogen is no longer declining smoothly; it is fluctuating wildly, often causing "estrogen dominance" symptoms like breast tenderness or irritability.',
-    },
-    "late_transition": {
-        "title": "The Gap (Late Transition)",
-        "cycle": "You have gone 60 days or more without a period, or you are skipping multiple cycles.",
-        "science": 'Your HPO (Hypothalamic-Pituitary-Ovarian) axis is beginning to "power down." This is the peak "window of vulnerability" for brain fog and hot flashes as the brain\'s thermostat (the hypothalamus) loses its steady estrogen supply.',
-    },
-    "early_postmenopause": {
-        "title": "The Milestone (Early Postmenopause)",
-        "cycle": "It has been more than 12 consecutive months since your last period.",
-        "science": "You have reached the official milestone of menopause. Your body is now adapting to a new, lower-estrogen baseline.",
-    },
-    "late_postmenopause": {
-        "title": "The New Plateau (Late Postmenopause)",
-        "cycle": "Permanent amenorrhea (no periods).",
-        "science": 'Beginning roughly 5-8 years after your final period, the endocrine system stabilizes. While hot flashes typically subside, the focus shifts to long-term "somatic" health—protecting the brain, bones, and cardiovascular system.',
-    },
-}
+
+def _load_stages_metadata() -> dict:
+    """Load stage definitions from the centralized metadata file."""
+    try:
+        with open("metadata/stages.json", "r") as f:
+            data = json.load(f)
+            return data.get("stages", {})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+STAGES = _load_stages_metadata()
 
 
 NEURO_SYMPTOMS = {
@@ -113,26 +98,27 @@ def render_onboarding():
         unsafe_allow_html=True,
     )
 
+    stages_metadata = _load_stages_metadata()
     stage_choice = st.radio(
         "Stage",
-        options=list(STAGES.keys()),
-        format_func=lambda x: STAGES[x]["title"],
+        options=list(stages_metadata.keys()),
+        format_func=lambda x: stages_metadata[x]["title"],
         label_visibility="collapsed",
         key="stage_radio",
     )
 
     # Display details for selected stage
     if stage_choice:
-        stage = STAGES[stage_choice]
+        stage = stages_metadata[stage_choice]
         st.markdown(
             f"""
             <div style="background-color: #E8F0F8; border: 1px solid #d0dff0; 
                         border-radius: 15px; padding: 20px; margin: 20px 0;">
                 <p style="color: #555; margin: 0 0 10px 0; font-size: 14px;">
-                    <strong>Cycle Pattern:</strong> {stage["cycle"]}
+                    <strong>Cycle Pattern:</strong> {stage.get("cycle_description", "N/A")}
                 </p>
                 <p style="color: #555; margin: 0; font-size: 14px;">
-                    <strong>The Science:</strong> {stage["science"]}
+                    <strong>The Science:</strong> {stage.get("neuro_science", "N/A")}
                 </p>
             </div>
             """,
@@ -173,9 +159,10 @@ def render_onboarding():
             key="save_profile",
             use_container_width=True,
         ):
+            stages_metadata = _load_stages_metadata()
             profile = {
                 "stage": stage_choice,
-                "stage_title": STAGES[stage_choice]["title"],
+                "stage_title": stages_metadata[stage_choice]["title"],
                 "neuro_symptoms": neuro_selected,
             }
             save_profile(profile)
@@ -197,13 +184,14 @@ def get_profile_summary() -> str:
     if not profile:
         return ""
 
+    stages_metadata = _load_stages_metadata()
     stage_key = profile.get("stage", "")
-    stage_info = STAGES.get(stage_key, {})
+    stage_info = stages_metadata.get(stage_key, {})
 
     lines = [
         "USER PROFILE:",
         f"Stage: {profile.get('stage_title', 'Unknown')}",
-        f"Cycle Pattern: {stage_info.get('cycle', 'N/A')}",
+        f"Cycle Pattern: {stage_info.get('cycle_description', 'N/A')}",
     ]
 
     neuro = profile.get("neuro_symptoms", [])

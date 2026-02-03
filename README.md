@@ -6,16 +6,17 @@ Selene is a specialized medical AI prototype designed to bridge the gap between 
 
 - **Selene Persona**: An empathetic, AI-driven menopause specialist grounded in clinical logic.
 - **Dual-RAG Architecture**: Strictly separates Global Research (PDFs) from Personal History (User Logs) using multi-collection ChromaDB storage.
-- **Personalized Research Alerts**: Connects your recent symptoms directly to the latest clinical breakthroughs.
-- **Automated Clinical Briefs**: Generates structured longitudinal summaries of symptoms for users to share with their healthcare providers.
+- **Daily Attune (Pulse)**: A specialized logging interface for tracking sleep (Rest), internal weather (Climate), and cognitive state (Clarity).
+- **Automated Clinical Briefs**: Generates structured longitudinal summaries with customizable date ranges for users to share with their healthcare providers.
 - **Local-First Privacy**: Powered by Ollama and MedGemma; no medical data ever leaves your machine.
-- **Advanced Chat History**: Persistent conversation history with ability to reference past context using vector-based retrieval.
+- **Dynamic Symptom Analysis**: Automatically populates clinical reports with frequency data and trends based on user logs.
 
 ## Technical Stack
 
 - **Model**: MedGemma (via Ollama)
 - **Frontend**: Streamlit with Custom CSS
 - **Vector Database**: ChromaDB
+- **Data Persistence**: Local JSON storage for structured logs and profiles
 - **Embeddings**: all-MiniLM-L6-v2 (Sentence-Transformers)
 - **Orchestration**: Python
 
@@ -46,11 +47,16 @@ streamlit run app.py
 ## Project Structure
 
 - **app.py**: Main application entry point and router.
-- **views/**: Contains UI pages (Home, Chat, Clinical, Pulse).
+- **onboarding.py**: User initialization and physiological stage mapping.
+- **config.py**: Global session state and app configuration.
+- **data_manager.py**: Unified interface for local JSON data persistence.
+- **views/**: UI pages (Home, Chat, Clinical, Pulse).
 - **med_logic.py**: Core RAG engine and Ollama integration logic.
 - **chat_db.py**: Database management for chat persistence and history retrieval.
+- **metadata/**: Clinical lookup tables (e.g., `stages.json`).
+- **user_data/**: Local encrypted storage for user profiles and pulse history.
 - **styles.py**: Centralized UI styling using CSS variables.
-- **user_med_db/**: Local ChromaDB storage.
+- **user_data/user_med_db/**: Local ChromaDB storage.
 - **papers/**: Directory for research PDFs used in RAG.
 - **output/**: Generated artifacts.
 

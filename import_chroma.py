@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def import_to_local_db(
     json_file: str,
-    db_path: str = "./user_med_db",
+    db_path: str = "user_data/user_med_db",
     collection_name: str = "medical_docs",
     batch_size: int = 500,
 ):
@@ -112,7 +112,7 @@ def import_to_local_db(
             errors += len(batch_ids)
 
     print(f"\n{'=' * 50}")
-    print(f"Import Complete!")
+    print("Import Complete!")
     print(f"   Imported: {imported}")
     print(f"   Errors: {errors}")
     print(f"   Collection total: {collection.count()} documents")
@@ -123,7 +123,7 @@ def import_to_local_db(
 
 def query_test(
     query: str,
-    db_path: str = "./user_med_db",
+    db_path: str = "user_data/user_med_db",
     collection_name: str = "medical_docs",
     n_results: int = 3,
 ):
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Import ChromaDB export JSON")
     parser.add_argument("json_file", help="JSON file to import")
-    parser.add_argument("--db-path", default="./user_med_db")
+    parser.add_argument("--db-path", default="user_data/user_med_db")
     parser.add_argument("--collection", default="medical_docs")
     parser.add_argument("--batch-size", type=int, default=500)
     parser.add_argument("--test-query", help="Run test query after import")

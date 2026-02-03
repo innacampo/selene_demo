@@ -55,3 +55,30 @@ def save_pulse_entry(entry_data: dict):
     # Save back to file
     with open(PULSE_HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=2)
+
+
+def get_filtered_pulse_history(start_date: datetime, end_date: datetime) -> list:
+    """
+    Get pulse history entries within a specific date range.
+
+    Args:
+        start_date (datetime): Start of the range (inclusive).
+        end_date (datetime): End of the range (inclusive).
+
+    Returns:
+        list: Filtered list of pulse entries.
+    """
+    history = load_pulse_history()
+    filtered = []
+
+    for entry in history:
+        try:
+            timestamp = datetime.fromisoformat(entry["timestamp"])
+            # Normalize to date for comparison if needed,
+            # but usually we want to compare the full datetime.
+            if start_date <= timestamp <= end_date:
+                filtered.append(entry)
+        except (KeyError, ValueError):
+            continue
+
+    return filtered

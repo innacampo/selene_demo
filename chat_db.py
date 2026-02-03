@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 class ChatDBConfig:
     # Same DB path as med_logic so everything lives in one place on disk
-    DB_PATH = "./user_med_db"
+    DB_PATH = "user_data/user_med_db"
     # Separate collection — keeps RAG docs and chat history cleanly partitioned
     COLLECTION_NAME = "chat_history"
     # Must match med_logic.Config.EMBEDDING_MODEL exactly — same model means

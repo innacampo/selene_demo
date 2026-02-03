@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Config:
-    DB_PATH = "./user_med_db"
+    DB_PATH = "user_data/user_med_db"
     COLLECTION_NAME = "medical_docs"
     EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Must match import script!
     LLM_MODEL = "tiny-medgemma"  # Or "tiny-medgemma" - be consistent
@@ -249,11 +249,20 @@ def call_medgemma(
     """
     # Import here to avoid circular dependency
     try:
-        from onboarding import get_profile_summary
+        from context_builder import build_user_context
 
-        profile_context = get_profile_summary()
+        # Build comprehensive user context from all available sources:
+        # - User profile (stage, neuro symptoms)
+        # - Recent pulse data (last 7 days of daily attune entries)
+        # - Optionally: deeper pattern analysis for complex queries
+        user_context = build_user_context(
+            include_profile=True,
+            include_recent_pulse=True,
+            include_pulse_analysis=False,  # Set to True for deeper analysis queries
+            recent_pulse_days=7,
+        )
     except ImportError:
-        profile_context = ""
+        user_context = ""
 
     base_instruction = """You are Selene, an empathetic and highly knowledgeable menopause specialist.
 
@@ -267,11 +276,11 @@ Your approach:
   (e.g. "As we discussed before...") but prioritize the research context for clinical accuracy
 - Keep up to 5 sentences in your response"""
 
-    # Inject user profile if available
-    if profile_context:
+    # Inject user context if available
+    if user_context:
         system_instruction = f"""{base_instruction}
 
-{profile_context}"""
+{user_context}"""
     else:
         system_instruction = base_instruction
 
