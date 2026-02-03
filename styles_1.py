@@ -121,13 +121,14 @@ def load_css():
             margin-bottom: 30px;
         }
 
-        .selene-sub-header {
-            font-size: 14px;
-            letter-spacing: 1px;
-            color: var(--primary-accent);
+        .sub-header {
+            text-align: center;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: var(--text-tertiary);
             text-transform: uppercase;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-top: 20px;
         }
 
         .italic-note {
@@ -300,10 +301,6 @@ def load_css():
             display: none !important;
         }
 
-        /* ============================================
-           CHAT INPUT STYLING - NO INNER BORDER
-           ============================================ */
-        
         /* Chat input - full width to match messages */
         [data-testid="stChatInput"] {
             max-width: 100% !important;
@@ -313,49 +310,6 @@ def load_css():
         [data-testid="stChatInput"] > div {
             max-width: 100% !important;
             width: 100% !important;
-            border-radius: 25px !important;
-            border: 1px solid var(--border-light) !important;
-            background-color: var(--white) !important;
-        }
-
-        /* Remove inner border/outline from chat input */
-        [data-testid="stChatInput"] textarea,
-        [data-testid="stChatInput"] input {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            font-family: var(--font-main) !important;
-        }
-
-        [data-testid="stChatInput"] [data-baseweb="base-input"],
-        [data-testid="stChatInput"] [data-baseweb="input"],
-        [data-testid="stChatInput"] [data-baseweb="textarea"] {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            background-color: transparent !important;
-        }
-
-        [data-testid="stChatInput"] > div > div {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Chat input focus state - only outer border changes */
-        [data-testid="stChatInput"] > div:focus-within {
-            border-color: var(--primary-accent) !important;
-            box-shadow: 0 0 0 1px var(--primary-accent) !important;
-        }
-
-        [data-testid="stChatInput"] > div:focus-within textarea,
-        [data-testid="stChatInput"] > div:focus-within input,
-        [data-testid="stChatInput"] > div:focus-within [data-baseweb="base-input"],
-        [data-testid="stChatInput"] > div:focus-within [data-baseweb="input"],
-        [data-testid="stChatInput"] > div:focus-within [data-baseweb="textarea"] {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
         }
 
         /* Chat input send button */
@@ -365,8 +319,6 @@ def load_css():
         [data-testid="stChatInput"] button:active {
             background-color: var(--primary-accent) !important;
             border-color: var(--primary-accent) !important;
-            border: none !important;
-            outline: none !important;
         }
 
         /* Hide status/spinner messages */
@@ -425,9 +377,32 @@ def load_css():
             font-family: var(--font-main) !important;
         }
 
-        /* ============================================
-           PULSE VIEW SPECIFIC STYLES
-           ============================================ */
+        /* Chat input styling */
+        .stChatInput > div {
+            border-radius: 25px !important;
+            border: 1px solid var(--border-light) !important;
+        }
+
+        .stChatInput textarea {
+            font-family: var(--font-main) !important;
+        }
+
+        .stChatInput > div:focus-within {
+            border-color: var(--primary-accent) !important;
+            box-shadow: 0 0 0 1px var(--primary-accent) !important;
+        }
+
+        /* Remove red outline from all inputs */
+        *:focus {
+            outline: none !important;
+        }
+
+        textarea:focus, input:focus {
+            border-color: var(--primary-accent) !important;
+            box-shadow: none !important;
+        }
+        
+        /* PULSE VIEW SPECIFIC STYLES */
         
         /* Segmented Control Styling */
         [data-testid="stSegmentedControl"] {
@@ -445,21 +420,26 @@ def load_css():
 
         /* Individual segments */
         [data-testid="stSegmentedControl"] button {
-            border: 1px solid var(--border-light) !important;
-            color: var(--text-tertiary) !important; 
+            border: none !important;
             border-radius: 8px !important;
             font-family: var(--font-main) !important;
             font-weight: 500 !important;
+            color: var(--text-secondary) !important;
             transition: all 0.3s ease !important;
-            background-color: var(--white) !important;
+            background-color: transparent !important; 
         }
 
-        [data-testid="stSegmentedControl"] button:hover:not([data-selected="true"]) {
-            background-color: #f8f9fa !important;
+        [data-testid="stSegmentedControl"] button:hover {
+            color: #FF8C00 !important; 
+            background-color: #FFF8E1 !important;         }
+
+        [data-testid="stSegmentedControl"] button[data-selected="true"] {
+             background-color: #F7D76D !important; 
+             color: #5D3A1A !important;
+             font-weight: 600 !important;
         }
-        
+
         </style>
-
         """,
         unsafe_allow_html=True,
     )

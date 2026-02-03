@@ -22,7 +22,7 @@ def render_home():
 
     # Middle text
     st.markdown(
-        '<div class="sub-header">LATE TRANSITION • HIGH VARIABILITY</div>',
+        '<div class="selene-sub-header" style="text-align: center;">LATE TRANSITION • HIGH VARIABILITY</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -39,7 +39,7 @@ def render_home():
     # Bottom button
     left, center, right = st.columns([1.45, 1, 1.45])
     with center:
-        if st.button("Log Today's Pulse", key="btn_pulse"):
+        if st.button("Daily Attune", key="btn_pulse"):
             go_to_page("pulse")
             st.rerun()
 

@@ -27,6 +27,11 @@ class Config:
     OLLAMA_BASE_URL = "http://localhost:11434"
     OLLAMA_TIMEOUT = 60
     RAG_TOP_K = 3
+    # Chat history retrieval tuning — kept conservative for tiny-medgemma's
+    # limited context window. The distance threshold is the main gatekeeper:
+    # ChromaDB L2 distances above this are too loosely related to bother including.
+    CHAT_HISTORY_TOP_K = 3
+    CHAT_HISTORY_DISTANCE_THRESHOLD = 0.7
 
 
 # ============================================================================
@@ -93,10 +98,10 @@ def pull_model_if_needed(model_name: str) -> str:
             timeout=300,  # 5 min for large models
         )
         if response.status_code == 200:
-            return f"✓ Model '{model_name}' pulled"
-        return f"⚠ Model pull returned status {response.status_code}"
+            return f"Model '{model_name}' pulled"
+        return f"Model pull returned status {response.status_code}"
     except Exception as e:
-        return f"✗ Failed to pull model: {e}"
+        return f"Failed to pull model: {e}"
 
 
 # ============================================================================
@@ -228,16 +233,26 @@ def query_knowledge_base(
         return "", [], {"error": str(e)}
 
 
-def call_medgemma(prompt: str, context: str = "", stream: bool = False):
+def call_medgemma(prompt: str, context: str = "", chat_context: str = "", stream: bool = False):
     """
     Call MedGemma via Ollama API.
 
     Args:
         prompt: User's question
-        context: RAG context from ChromaDB
+        context: RAG context from the medical_docs knowledge base
+        chat_context: Relevant past conversation excerpts from chat_history.
+                      Pre-formatted by the caller — just gets dropped into the
+                      prompt as-is. Empty string if nothing relevant was found.
         stream: If True, yields chunks for streaming UI
     """
-    system_instruction = """You are Dr. Selene, an empathetic and highly knowledgeable menopause specialist.
+    # Import here to avoid circular dependency
+    try:
+        from onboarding import get_profile_summary
+        profile_context = get_profile_summary()
+    except ImportError:
+        profile_context = ""
+    
+    base_instruction = """You are Dr. Selene, an empathetic and highly knowledgeable menopause specialist.
 
 Your approach:
 - Supportive, grounded, and clinical yet accessible tone
@@ -245,22 +260,43 @@ Your approach:
 - Cite when findings are from recent 2024/2025 research
 - If uncertain, acknowledge limitations and recommend consulting a healthcare provider
 - Structure responses clearly with bullet points when appropriate
+- If relevant past conversations are provided, you may reference them to provide continuity
+  (e.g. "As we discussed before...") but prioritize the research context for clinical accuracy
 - Keep up to 5 sentences in your response"""
+    
+    # Inject user profile if available
+    if profile_context:
+        system_instruction = f"""{base_instruction}
+
+{profile_context}"""
+    else:
+        system_instruction = base_instruction
+
+    # Build prompt in sections. Order matters for small models: put the
+    # question at the END so it's closest to where generation starts.
+    sections = []
 
     if context:
-        full_prompt = f"""Using the following research context:
+        sections.append(f"Research Context (from knowledge base):\n{context}")
 
-{context}
+    if chat_context:
+        sections.append(f"Relevant Past Conversations:\n{chat_context}")
 
----
-
-Patient Question: {prompt}
-
-Please provide a helpful, evidence-based response:"""
+    if sections:
+        combined_context = "\n\n---\n\n".join(sections)
+        full_prompt = (
+            f"{combined_context}\n\n"
+            f"---\n\n"
+            f"Patient Question: {prompt}\n\n"
+            f"Please provide a helpful, evidence-based response:"
+        )
     else:
-        full_prompt = f"""Patient Question: {prompt}
-
-Note: No specific research context available for this query. Please provide general guidance and recommend consulting recent literature or a healthcare provider for specific advice."""
+        full_prompt = (
+            f"Patient Question: {prompt}\n\n"
+            f"Note: No specific research context available for this query. "
+            f"Please provide general guidance and recommend consulting recent "
+            f"literature or a healthcare provider for specific advice."
+        )
 
     payload = {
         "model": Config.LLM_MODEL,

@@ -3,6 +3,7 @@ import streamlit as st
 from config import init_page_config, init_session_state
 from styles import load_css
 from views import render_home, render_chat, render_clinical, render_pulse
+from onboarding import render_onboarding
 
 
 # ----------------------------
@@ -26,6 +27,13 @@ PAGE_ROUTES = {
 
 def main():
     """Main application entry point."""
+    
+    # Check if onboarding is complete
+    if not st.session_state.get("onboarding_complete", False):
+        render_onboarding()
+        return
+    
+    # Normal app flow
     current_page = st.session_state.page
 
     if current_page in PAGE_ROUTES:

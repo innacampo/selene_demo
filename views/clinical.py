@@ -1,7 +1,6 @@
 import streamlit as st
-import streamlit.components.v1 as components
 from fpdf import FPDF
-import base64
+
 from navigation import render_header_with_back
 
 
@@ -89,36 +88,6 @@ def generate_pdf() -> bytes:
     return bytes(pdf.output())
 
 
-def open_pdf_in_new_tab(pdf_bytes: bytes):
-    """Open PDF in a new browser tab using JavaScript."""
-    base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-
-    # JavaScript to open PDF in new tab
-    pdf_js = f"""
-        <script>
-            const pdfData = "data:application/pdf;base64,{base64_pdf}";
-            const newWindow = window.open();
-            if (newWindow) {{
-                newWindow.document.write(`
-                    <html>
-                        <head><title>Clinical Summary</title></head>
-                        <body style="margin:0;padding:0;">
-                            <embed width="100%" height="100%" src="${{pdfData}}" type="application/pdf">
-                        </body>
-                    </html>
-                `);
-            }} else {{
-                // Fallback: trigger download if popup blocked
-                const link = document.createElement('a');
-                link.href = pdfData;
-                link.download = 'clinical_summary.pdf';
-                link.click();
-            }}
-        </script>
-    """
-    components.html(pdf_js, height=0, width=0)
-
-
 def _render_summary_card(title: str, content: str):
     """Render a single summary card."""
     st.markdown(
@@ -148,6 +117,12 @@ def render_clinical():
     # Export button
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("Export for Doctor", key="export", use_container_width=True):
-            pdf_bytes = generate_pdf()
-            open_pdf_in_new_tab(pdf_bytes)
+        pdf_bytes = generate_pdf()
+        st.download_button(
+            label="Export for Doctor",
+            data=pdf_bytes,
+            file_name="clinical_summary.pdf",
+            mime="application/pdf",
+            on_click="ignore",
+            use_container_width=True,
+        )
