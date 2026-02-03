@@ -233,7 +233,9 @@ def query_knowledge_base(
         return "", [], {"error": str(e)}
 
 
-def call_medgemma(prompt: str, context: str = "", chat_context: str = "", stream: bool = False):
+def call_medgemma(
+    prompt: str, context: str = "", chat_context: str = "", stream: bool = False
+):
     """
     Call MedGemma via Ollama API.
 
@@ -248,11 +250,12 @@ def call_medgemma(prompt: str, context: str = "", chat_context: str = "", stream
     # Import here to avoid circular dependency
     try:
         from onboarding import get_profile_summary
+
         profile_context = get_profile_summary()
     except ImportError:
         profile_context = ""
-    
-    base_instruction = """You are Dr. Selene, an empathetic and highly knowledgeable menopause specialist.
+
+    base_instruction = """You are Selene, an empathetic and highly knowledgeable menopause specialist.
 
 Your approach:
 - Supportive, grounded, and clinical yet accessible tone
@@ -263,7 +266,7 @@ Your approach:
 - If relevant past conversations are provided, you may reference them to provide continuity
   (e.g. "As we discussed before...") but prioritize the research context for clinical accuracy
 - Keep up to 5 sentences in your response"""
-    
+
     # Inject user profile if available
     if profile_context:
         system_instruction = f"""{base_instruction}

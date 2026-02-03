@@ -6,7 +6,7 @@ def render_pulse():
     """Render the pulse logging page."""
     render_header_with_back("back_pulse")
 
-    st.markdown('<div class="page-title">Pulse</div>', unsafe_allow_html=True)
+    st.markdown('<div class="page-title">Attune</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
     # PILLAR 1: REST

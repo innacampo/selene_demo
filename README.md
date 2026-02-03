@@ -4,7 +4,7 @@ Selene is a specialized medical AI prototype designed to bridge the gap between 
 
 ## Key Features
 
-- **Dr. Selene Persona**: An empathetic, AI-driven menopause specialist grounded in clinical logic.
+- **Selene Persona**: An empathetic, AI-driven menopause specialist grounded in clinical logic.
 - **Dual-RAG Architecture**: Strictly separates Global Research (PDFs) from Personal History (User Logs) using multi-collection ChromaDB storage.
 - **Personalized Research Alerts**: Connects your recent symptoms directly to the latest clinical breakthroughs.
 - **Automated Clinical Briefs**: Generates structured longitudinal summaries of symptoms for users to share with their healthcare providers.
