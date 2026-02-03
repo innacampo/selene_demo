@@ -1,12 +1,13 @@
 import streamlit as st
 from navigation import render_header_with_back
+from data_manager import save_pulse_entry
 
 
 def render_pulse():
     """Render the pulse logging page."""
     render_header_with_back("back_pulse")
 
-    st.markdown('<div class="page-title">Attune</div>', unsafe_allow_html=True)
+    st.markdown('<div class="page-title">Daily Attune</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
     # PILLAR 1: REST
@@ -52,6 +53,15 @@ def render_pulse():
         label_visibility="visible",
     )
 
-    if st.button("Save Entry", use_container_width=True):
-        # TODO: Save logic would go here
-        st.success("Attune Captured.")
+    if st.button("Save", use_container_width=True):
+        if not rest_option or not climate_level or not clarity_level:
+            st.warning("Please select an option for all three pillars.")
+        else:
+            entry = {
+                "rest": rest_option,
+                "climate": climate_level,
+                "clarity": clarity_level,
+                "notes": notes,
+            }
+            save_pulse_entry(entry)
+            st.success("Daily Attune Captured.")

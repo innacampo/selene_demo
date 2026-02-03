@@ -15,10 +15,10 @@ def init_session_state():
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-    
+
     # Check if onboarding is complete
     if "onboarding_complete" not in st.session_state:
-        profile_path = Path("./user_profile.json")
+        profile_path = Path("user_data/user_profile.json")
         if profile_path.exists():
             # Load existing profile into session state
             with open(profile_path, "r") as f:

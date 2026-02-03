@@ -8,7 +8,7 @@ from datetime import datetime
 # Profile Storage
 # ============================================================================
 
-PROFILE_PATH = Path("./user_profile.json")
+PROFILE_PATH = Path("user_data/user_profile.json")
 
 
 def save_profile(profile_data: dict):
