@@ -1,0 +1,65 @@
+{
+    "source_criteria": "STRAW+10",
+    "stages": {
+        "steady_state": {
+            "stage_id": "-3",
+            "title": "The Steady State (Late Reproductive)",
+            "cycle_description": "Periods are regular, but the cycle may shorten by 2-3 days (e.g., from 28 to 25 days).",
+            "neuro_science": "Ovarian reserve begins to decline. The brain works harder to signal the ovaries, leading to early spikes in Follicle-Stimulating Hormone (FSH).",
+            "focus_area": "Baseline monitoring",
+            "ui_markup": {
+                "sub_header": "STEADY STATE • LATE REPRODUCTIVE",
+                "italic_note": "Subtle changes beginning",
+                "main_message": "Your brain is working harder to maintain balance;<br>this is the time to establish your health baseline."
+            }
+        },
+        "early_transition": {
+            "stage_id": "-2",
+            "title": "The Great Fluctuation (Early Transition)",
+            "cycle_description": "A persistent difference in cycle length (7+ days difference between consecutive cycles).",
+            "neuro_science": "The onset of \"true\" perimenopause. Estrogen is no longer declining smoothly; it fluctuates wildly, often causing \"estrogen dominance\" symptoms like irritability or breast tenderness.",
+            "focus_area": "Emotional regulation & symptom tracking",
+            "ui_markup": {
+                "sub_header": "EARLY TRANSITION • ONSET OF VARIABILITY",
+                "italic_note": "Hormonal surges possible",
+                "main_message": "Wild estrogen fluctuations may lead to mood shifts<br>as your system begins its transition."
+            }
+        },
+        "late_transition": {
+            "stage_id": "-1",
+            "title": "The Gap (Late Transition)",
+            "cycle_description": "60 days or more without a period, or skipping multiple cycles entirely.",
+            "neuro_science": "The Hypothalamic-Pituitary-Ovarian (HPO) axis is \"powering down.\" This is the peak \"window of vulnerability\" for the brain's thermostat (the hypothalamus) as it loses its steady estrogen supply.",
+            "focus_area": "Thermoregulation & cognitive support",
+            "ui_markup": {
+                "sub_header": "LATE TRANSITION • HIGH VARIABILITY",
+                "italic_note": "Fluctuations expected",
+                "main_message": "Sleep disruptions and hot flashes are common as the<br>hypothalamus adjusts to changing estrogen levels."
+            }
+        },
+        "early_postmenopause": {
+            "stage_id": "+1",
+            "title": "The Milestone (Early Postmenopause)",
+            "cycle_description": "It has been 12+ consecutive months since your last period (Years 1–5 post-FMP).",
+            "neuro_science": "You have reached the official milestone of menopause. The brain and body are actively adapting to a new, lower-estrogen baseline.",
+            "focus_area": "Metabolic adaptation",
+            "ui_markup": {
+                "sub_header": "EARLY POSTMENOPAUSE • THE ADAPTATION",
+                "italic_note": "Finding a new baseline",
+                "main_message": "Your body is recalibrating to a lower estrogen state,<br>shifting focus toward metabolic and bone health."
+            }
+        },
+        "late_postmenopause": {
+            "stage_id": "+2",
+            "title": "The New Plateau (Late Postmenopause)",
+            "cycle_description": "Permanent amenorrhea (no periods).",
+            "neuro_science": "Beginning roughly 5-8 years after your final period, the endocrine system stabilizes. While hot flashes typically subside, the focus shifts to long-term \"somatic\" health—protecting the brain, bones, and cardiovascular system.",
+            "focus_area": "Long-term cognitive health & vitality",
+            "ui_markup": {
+                "sub_header": "LATE POSTMENOPAUSE • THE NEW PLATEAU",
+                "italic_note": "Stability achieved",
+                "main_message": "With the endocrine system stabilized, the focus turns<br>to long-term vitality and cognitive preservation."
+            }
+        }
+    }
+}
