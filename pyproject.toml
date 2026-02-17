@@ -1,0 +1,115 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "selene"
+version = "0.1.0"
+description = "Privacy-first menopause assistant with local LLM support"
+readme = "README.md"
+license = {text = "CC-BY-4.0"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Inna Campo"}
+]
+keywords = [
+    "menopause",
+    "health",
+    "llm",
+    "rag",
+    "streamlit",
+    "medgemma",
+    "privacy",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Streamlit",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: End Users/Desktop",
+    "License :: Other/Proprietary License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "streamlit>=1.35",
+    "requests>=2.28",
+    "chromadb>=0.4",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "sentence-transformers>=2.0",
+    "xhtml2pdf>=0.2.17",
+    "markdown>=3.5",
+    "pymupdf>=1.23",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "pre-commit>=3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/innacampo/selene_shell_to_brain"
+Repository = "https://github.com/innacampo/selene_shell_to_brain"
+Issues = "https://github.com/innacampo/selene_shell_to_brain/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["selene*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["selene"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src/selene"]
+omit = [
+    "med_env/*",
+    "tests/*",
+    "scripts/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
