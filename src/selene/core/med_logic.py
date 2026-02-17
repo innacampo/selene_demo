@@ -5,20 +5,21 @@ Includes: User Context, Query Contextualization, Rolling Buffer, and TTL Caching
 DEBUG MODE: Set environment variable DEBUG_MEDLOGIC=1 for verbose output.
 """
 
+import hashlib
+import json
+import logging
 import os
-import time
 import subprocess
 import threading
-import requests
-import json
-import hashlib
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-import streamlit as st
-import logging
-from datetime import datetime, timedelta
-from typing import Optional, Tuple, List, Dict, Any
+import time
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any
+
+import chromadb
+import requests
+import streamlit as st
+from chromadb.config import Settings as ChromaSettings
 
 from selene import settings
 
@@ -85,12 +86,12 @@ class TTLCache:
 
     def __init__(self, max_size: int = 100):
         self._lock = threading.Lock()
-        self.cache: Dict[str, CacheEntry] = {}
+        self.cache: dict[str, CacheEntry] = {}
         self.max_size = max_size
         self.hits = 0
         self.misses = 0
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Retrieve value from cache if not expired."""
         with self._lock:
             if key in self.cache:
@@ -135,7 +136,7 @@ class TTLCache:
             self.misses = 0
             logger.info("Cache CLEARED")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         with self._lock:
             total_requests = self.hits + self.misses
@@ -308,7 +309,7 @@ def get_chroma_collection():
 # ============================================================================
 
 
-def contextualize_query(query: str, history: List[Dict]) -> str:
+def contextualize_query(query: str, history: list[dict]) -> str:
     """
     Rewrites 'What about it?' into 'What about [Drug X]?' for better RAG.
     CACHED: Similar query+history combinations are cached for 5 minutes.
@@ -391,8 +392,8 @@ def contextualize_query(query: str, history: List[Dict]) -> str:
 
 
 def query_knowledge_base(
-    query: str, top_k: Optional[int] = None
-) -> Tuple[str, List[str], List[Dict]]:
+    query: str, top_k: int | None = None
+) -> tuple[str, list[str], list[dict]]:
     """
     Query ChromaDB for relevant documents with Section-Aware formatting.
     CACHED: Identical queries are cached for 10 minutes.
@@ -542,7 +543,7 @@ def _prepare_medgemma_request(
     prompt: str,
     context: str = "",
     chat_context: str = "",
-    recent_history: Optional[List[Dict]] = None,
+    recent_history: list[dict] | None = None,
     stream: bool = False,
 ) -> dict:
     """
@@ -681,7 +682,7 @@ def call_medgemma(
     prompt: str,
     context: str = "",
     chat_context: str = "",
-    recent_history: Optional[List[Dict]] = None,
+    recent_history: list[dict] | None = None,
 ) -> str:
     """
     Call MedGemma and return the complete response as a string.
@@ -727,7 +728,7 @@ def call_medgemma_stream(
     prompt: str,
     context: str = "",
     chat_context: str = "",
-    recent_history: Optional[List[Dict]] = None,
+    recent_history: list[dict] | None = None,
 ):
     """
     Call MedGemma with streaming. Yields response chunks as they arrive.
@@ -775,7 +776,7 @@ def call_medgemma_stream(
 # ============================================================================
 
 
-def get_cache_stats() -> Dict[str, Any]:
+def get_cache_stats() -> dict[str, Any]:
     """Get statistics for all caches."""
     stats = {
         "contextualized_query": contextualized_query_cache.get_stats(),

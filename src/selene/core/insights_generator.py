@@ -10,25 +10,24 @@ Improvements:
 """
 
 import json
-import requests
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Tuple, Dict, Optional, List
-from dataclasses import dataclass, asdict
-import time
-
 import logging
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+
+import requests
+
 from selene import settings
 
 logger = logging.getLogger(__name__)
 
+from selene.core.context_builder_multi_agent import build_complete_context, get_context_summary
 from selene.core.deterministic_analysis import (
     DeterministicAnalyzer,
-    format_statistics_summary,
     format_pattern_summary,
+    format_statistics_summary,
 )
-
-from selene.core.context_builder_multi_agent import build_complete_context, get_context_summary
 
 # HTTP session with retries
 _http_session = requests.Session()
@@ -46,7 +45,7 @@ class ReportMetrics:
     context_completeness: float
 
 
-def validate_context(context: Dict) -> Tuple[bool, str]:
+def validate_context(context: dict) -> tuple[bool, str]:
     """
     Validate context before report generation.
     
@@ -56,25 +55,25 @@ def validate_context(context: Dict) -> Tuple[bool, str]:
     # Check pulse data
     if not context.get("pulse_entries"):
         return False, "No pulse data available for this period"
-    
+
     if len(context["pulse_entries"]) < 3:
         return False, f"Insufficient data: only {len(context['pulse_entries'])} entries (minimum 3 required)"
-    
+
     # Check completeness
     completeness = context["metadata"].get("data_completeness_score", 0)
     if completeness < 0.4:
         return False, f"Data completeness too low: {completeness*100:.0f}% (minimum 40% required)"
-    
+
     logger.debug(f"Context validation passed: {len(context['pulse_entries'])} entries, "
                  f"{completeness*100:.0f}% complete")
     return True, ""
 
 
-def calculate_report_metrics(report_text: str, generation_time: float, 
-                             context: Dict) -> ReportMetrics:
+def calculate_report_metrics(report_text: str, generation_time: float,
+                             context: dict) -> ReportMetrics:
     """Calculate quality metrics for the generated report."""
     word_count = len(report_text.split())
-    
+
     # Check for required sections
     required_sections = [
         "### How You've Been",
@@ -82,10 +81,10 @@ def calculate_report_metrics(report_text: str, generation_time: float,
         "### Patterns & Connections",
         "### For Your Provider"
     ]
-    
+
     section_count = sum(1 for section in required_sections if section in report_text)
     has_all_sections = section_count == len(required_sections)
-    
+
     return ReportMetrics(
         word_count=word_count,
         section_count=section_count,
@@ -119,10 +118,10 @@ def clean_report_text(report_text: str) -> str:
         "***",
         "---",
     ]
-    
+
     lines = report_text.split('\n')
     start_idx = 0
-    
+
     # Find the first line that contains a markdown header (###)
     for idx, line in enumerate(lines):
         stripped = line.strip()
@@ -136,10 +135,10 @@ def clean_report_text(report_text: str) -> str:
         elif stripped and len(stripped) > 20 and not any(p in stripped for p in ['*', '-', 'ready', 'provide']):
             start_idx = idx
             break
-    
+
     # Rejoin from the start index
     cleaned = '\n'.join(lines[start_idx:])
-    
+
     # Remove common postambles
     postamble_patterns = [
         "I hope this",
@@ -148,10 +147,10 @@ def clean_report_text(report_text: str) -> str:
         "Don't hesitate",
         "Remember, I'm here",
     ]
-    
+
     lines = cleaned.split('\n')
     end_idx = len(lines)
-    
+
     # Scan backwards for postambles
     for idx in range(len(lines) - 1, -1, -1):
         stripped = lines[idx].strip()
@@ -160,16 +159,16 @@ def clean_report_text(report_text: str) -> str:
         elif stripped and '###' in stripped:
             # Stop at last valid section
             break
-    
+
     cleaned = '\n'.join(lines[:end_idx])
-    
+
     # Clean up extra whitespace
     cleaned = '\n'.join(line for line in cleaned.split('\n') if line.strip() or '')
-    
+
     return cleaned.strip()
 
 
-def validate_report_quality(report_text: str, context: Dict) -> Tuple[bool, List[str]]:
+def validate_report_quality(report_text: str, context: dict) -> tuple[bool, list[str]]:
     """
     Check for common quality issues in generated report.
     
@@ -177,44 +176,44 @@ def validate_report_quality(report_text: str, context: Dict) -> Tuple[bool, List
         (is_valid, list_of_issues)
     """
     issues = []
-    
+
     # Check for vague language
     vague_phrases = [
-        "some positive shifts", "areas needing attention", "quite", 
+        "some positive shifts", "areas needing attention", "quite",
         "somewhat", "a bit", "rather", "fairly", "pretty much"
     ]
     for phrase in vague_phrases:
         if phrase.lower() in report_text.lower():
             issues.append(f"Contains vague phrase: '{phrase}'")
-    
+
     # Check for specific date references if notes exist
     has_dates = any(month in report_text for month in [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ])
-    
+
     if context["metadata"]["notes_count"] > 0 and not has_dates:
         issues.append("No specific dates referenced from user notes")
-    
+
     # Check for direct quotes if notes exist
     if context["metadata"]["notes_count"] > 0 and '"' not in report_text:
         issues.append("No direct quotes from user's notes (adds authenticity)")
-    
+
     # Check all required sections present
     required_sections = [
-        "### How You've Been", 
+        "### How You've Been",
         "### What Your Body Is Telling You",
-        "### Patterns & Connections", 
+        "### Patterns & Connections",
         "### For Your Provider"
     ]
     missing_sections = [s for s in required_sections if s not in report_text]
     if missing_sections:
         issues.append(f"Missing sections: {', '.join(missing_sections)}")
-    
+
     # Check for scale mentions (should explain what scores mean)
     if "/10" not in report_text:
         issues.append("No score explanations found (should reference X/10 scale)")
-    
+
     return len(issues) == 0, issues
 
 
@@ -242,11 +241,11 @@ def generate_insights_report(
     model: str = settings.LLM_MODEL,
     timeout: int = 240,
     save_full_report: bool = False,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     retry_on_failure: bool = True,
     max_retries: int = 2
-) -> Tuple[bool, str, Optional[Dict]]:
+) -> tuple[bool, str, dict | None]:
     """
     Generate a personal insights report with enhanced error handling.
     
@@ -254,21 +253,21 @@ def generate_insights_report(
         Tuple[bool, str, Optional[Dict]]: (success, report_or_error, metadata)
     """
     generation_start = time.time()
-    
+
     try:
         # === 1. Build enriched context ===
         logger.info("Building enriched context")
         context = build_complete_context(start_date=start_date, end_date=end_date)
-        
+
         # Log context summary
         logger.debug(get_context_summary(context))
-        
+
         # Validate context
         is_valid, error_msg = validate_context(context)
         if not is_valid:
             logger.error(f"Context validation failed: {error_msg}")
             return False, error_msg, None
-        
+
         logger.info(f"Context ready: {len(context['pulse_entries'])} entries, "
                    f"{context['metadata']['notes_count']} notes, "
                    f"{context['metadata']['chat_message_count']} messages")
@@ -399,10 +398,10 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
 ---
 {examples}
 """
-        
+
         # === 4. LLM call with retry logic ===
         logger.info(f"Calling LLM ({model})")
-        
+
         payload = {
             "model": model,
             "prompt": prompt,
@@ -417,13 +416,13 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
 
         report_text = None
         last_error = None
-        
+
         for attempt in range(max_retries + 1):
             try:
                 if attempt > 0:
                     logger.info(f"Retry attempt {attempt}/{max_retries}")
                     time.sleep(2 ** attempt)  # Exponential backoff
-                
+
                 response = _http_session.post(
                     f"{ollama_base_url}/api/generate",
                     json=payload,
@@ -443,18 +442,18 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
                     if not retry_on_failure or attempt == max_retries:
                         return False, last_error, None
                     continue
-                
+
                 # Clean unwanted preambles/postambles
                 report_text = clean_report_text(report_text)
-                
+
                 # Success!
                 break
-                
+
             except requests.exceptions.Timeout:
                 last_error = "LLM request timed out"
                 if not retry_on_failure or attempt == max_retries:
                     return False, f"{last_error}. Try again or increase timeout.", None
-                    
+
             except requests.exceptions.ConnectionError:
                 last_error = "Cannot connect to Ollama"
                 if not retry_on_failure or attempt == max_retries:
@@ -471,7 +470,7 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
         logger.info(f"Report metrics: {metrics.word_count} words, "
                    f"{metrics.section_count}/4 sections, "
                    f"completeness: {metrics.context_completeness*100:.0f}%")
-        
+
         # Validate report quality
         is_quality, quality_issues = validate_report_quality(report_text, context)
         if not is_quality:
@@ -495,7 +494,7 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
                     patterns_dict = patterns
                 else:
                     patterns_dict = str(patterns)
-            
+
             full_report = {
                 "generated_at": datetime.now().isoformat(),
                 "model": model,
@@ -511,7 +510,7 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
                 "report_text": report_text,
                 "metrics": asdict(metrics),
             }
-            
+
             try:
                 with open(report_path, "w", encoding="utf-8") as f:
                     json.dump(full_report, f, indent=2, ensure_ascii=False, default=str)
@@ -534,8 +533,8 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
         return False, f"Error generating report: {str(e)}", None
 
 
-def format_report_for_pdf(report_text: str, user_profile: dict, 
-                          metrics: Optional[Dict] = None) -> dict:
+def format_report_for_pdf(report_text: str, user_profile: dict,
+                          metrics: dict | None = None) -> dict:
     """Structure report for PDF generation with metrics."""
     result = {
         "title": "SELENE Insights Report",
@@ -548,35 +547,35 @@ def format_report_for_pdf(report_text: str, user_profile: dict,
             "discuss these insights with your healthcare provider."
         ),
     }
-    
+
     if metrics:
         result["metrics"] = metrics
-    
+
     return result
 
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="SELENE Insights Generator (Enhanced)")
     parser.add_argument("--model", default=settings.LLM_MODEL, help="Model name")
     parser.add_argument("--url", default=settings.OLLAMA_BASE_URL, help="Ollama URL")
     parser.add_argument("--days", type=int, default=30, help="Days to analyze")
     parser.add_argument("--no-retry", action="store_true", help="Disable retry on failure")
-    
+
     args = parser.parse_args()
-    
+
     success, report, metrics = generate_insights_report(
         ollama_base_url=args.url,
         model=args.model,
         save_full_report=True,
         retry_on_failure=not args.no_retry
     )
-        
+
     if success:
         print("\n" + report)
         if metrics:
-            print(f"\n--- Metrics ---")
+            print("\n--- Metrics ---")
             print(f"Words: {metrics['word_count']}")
             print(f"Sections: {metrics['section_count']}/4")
             print(f"Generation time: {metrics['generation_time_seconds']}s")

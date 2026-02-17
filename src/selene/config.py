@@ -5,9 +5,10 @@ Handles Streamlit page setup and initializes the persistent session state.
 Syncs local profile data with runtime state to ensure cross-view consistency.
 """
 
-import logging
-import streamlit as st
 import json
+import logging
+
+import streamlit as st
 
 from selene import settings
 
@@ -29,10 +30,10 @@ def init_session_state():
     if "onboarding_complete" not in st.session_state:
         if settings.PROFILE_PATH.exists():
             try:
-                with open(settings.PROFILE_PATH, "r", encoding="utf-8") as f:
+                with open(settings.PROFILE_PATH, encoding="utf-8") as f:
                     st.session_state.user_profile = json.load(f)
                 st.session_state.onboarding_complete = True
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 logging.getLogger(__name__).warning(
                     f"Corrupted profile, restarting onboarding: {e}"
                 )

@@ -5,19 +5,20 @@ The landing interface for SELENE. It dynamically adapts its messaging
 and layout based on the user's identified menopause stage and profile.
 """
 
-import streamlit as st
-from html import escape as html_escape
-from selene.ui.navigation import go_to_page
 import json
+from html import escape as html_escape
+
+import streamlit as st
 
 from selene import settings
+from selene.ui.navigation import go_to_page
 
 
 @st.cache_data(show_spinner=False)
 def _load_stages_data() -> dict:
     """Load stages metadata from JSON file (cached)."""
     try:
-        with open(settings.STAGES_METADATA_PATH, "r") as f:
+        with open(settings.STAGES_METADATA_PATH) as f:
             return json.load(f)
     except Exception:
         return {"stages": {}}

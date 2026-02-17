@@ -8,10 +8,10 @@ personalized, clinically-aware reasoning without manual user input of their hist
 """
 
 import json
-import time
 import logging
-from pathlib import Path
+import time
 from datetime import datetime, timedelta
+
 import streamlit as st
 
 from selene import settings
@@ -46,12 +46,12 @@ def get_user_profile_hash() -> str:
     profile_path = settings.PROFILE_PATH
     if profile_path.exists():
         try:
-            with open(profile_path, "r", encoding="utf-8") as f:
+            with open(profile_path, encoding="utf-8") as f:
                 profile = json.load(f)
                 hash_parts.append(str(profile.get("last_updated", "")))
                 hash_parts.append(str(profile.get("stage", "")))
                 logger.debug(f"get_user_profile_hash: profile last_updated={profile.get('last_updated', '')}, stage={profile.get('stage', '')}")
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"get_user_profile_hash: Failed to read profile: {e}")
 
     # Include pulse history modification time
@@ -86,7 +86,7 @@ def get_profile_context() -> str:
         if settings.PROFILE_PATH.exists():
             source = "file"
             try:
-                with open(settings.PROFILE_PATH, "r", encoding="utf-8") as f:
+                with open(settings.PROFILE_PATH, encoding="utf-8") as f:
                     profile = json.load(f)
             except Exception as e:
                 logger.warning(f"get_profile_context: Failed to read profile file: {e}")
@@ -99,7 +99,7 @@ def get_profile_context() -> str:
 
     # Load stage descriptions
     try:
-        with open(settings.STAGES_METADATA_PATH, "r", encoding="utf-8") as f:
+        with open(settings.STAGES_METADATA_PATH, encoding="utf-8") as f:
             stages_data = json.load(f)
     except Exception as e:
         logger.warning(f"get_profile_context: Failed to load stages metadata: {e}")

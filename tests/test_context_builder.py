@@ -8,14 +8,12 @@ completeness scoring.
 Heavy use of mocking to avoid Streamlit/file I/O side-effects.
 """
 
-import sys
-import json
 import hashlib
-from pathlib import Path
+import json
+import sys
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
-
-import pytest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # Streamlit must be patched before importing modules that reference st.*
 _st_mock = MagicMock()
@@ -36,7 +34,6 @@ _st_mock.session_state = {}
 
 from selene.core import context_builder as cb
 from selene.core import context_builder_multi_agent as cb_multi
-
 
 # ---------------------------------------------------------------------------
 # Helpers

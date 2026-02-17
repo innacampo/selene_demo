@@ -9,13 +9,13 @@ LLM reasoning. This module handles:
 4. Safety Guardrails: Rule-based risk scoring for urgent clinical flags.
 """
 
-import numpy as np
-from scipy import stats, signal
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass
-
 import logging
+from dataclasses import dataclass
+from datetime import datetime
+
+import numpy as np
+from scipy import stats
+
 from selene.constants import SYMPTOM_SEVERITY_MAP
 
 logger = logging.getLogger(__name__)
@@ -45,11 +45,11 @@ class PatternAnalysis:
     weekly_confidence: float
     has_monthly_cycle: bool
     monthly_confidence: float
-    correlations: Dict[str, float]  # e.g., {"rest-climate": -0.45}
+    correlations: dict[str, float]  # e.g., {"rest-climate": -0.45}
     trend_direction: str
     trend_strength: float
-    outlier_dates: List[str]
-    change_points: List[str]
+    outlier_dates: list[str]
+    change_points: list[str]
 
 
 class DeterministicAnalyzer:
@@ -66,7 +66,7 @@ class DeterministicAnalyzer:
         self.score_map = SYMPTOM_SEVERITY_MAP  # 0 = no symptoms, 10 = severe
         logger.debug(f"DeterministicAnalyzer.__init__: min_data_points={self.min_data_points}")
 
-    def _map_symptom_to_score(self, value: any) -> Optional[float]:
+    def _map_symptom_to_score(self, value: any) -> float | None:
         """Convert qualitative labels or numeric strings to float scores."""
         if value is None:
             logger.debug("_map_symptom_to_score: value is None -> None")
@@ -101,9 +101,9 @@ class DeterministicAnalyzer:
 
     def analyze_symptom_statistics(
         self,
-        entries: List[Dict],
+        entries: list[dict],
         symptom_key: str,  # "rest", "climate", or "clarity"
-    ) -> Optional[SymptomStatistics]:
+    ) -> SymptomStatistics | None:
         """
         Calculate comprehensive statistics for a single symptom.
 
@@ -179,7 +179,7 @@ class DeterministicAnalyzer:
     # Pattern Detection
     # ========================================================================
 
-    def detect_patterns(self, entries: List[Dict]) -> PatternAnalysis:
+    def detect_patterns(self, entries: list[dict]) -> PatternAnalysis:
         """
         Detect temporal patterns and correlations in symptom data.
         Uses statistical methods instead of LLM.
@@ -246,7 +246,7 @@ class DeterministicAnalyzer:
             change_points=change_points,
         )
 
-    def _detect_cycle(self, values: np.ndarray, period: int) -> Tuple[bool, float]:
+    def _detect_cycle(self, values: np.ndarray, period: int) -> tuple[bool, float]:
         """
         Detect if there's a cyclical pattern at given period.
         Uses autocorrelation.
@@ -260,7 +260,10 @@ class DeterministicAnalyzer:
                 values - np.mean(values), values - np.mean(values), mode="full"
             )
             autocorr = autocorr[len(autocorr) // 2 :]
-            autocorr = autocorr / autocorr[0]  # Normalize
+            baseline = autocorr[0]
+            if np.isclose(baseline, 0.0):
+                return False, 0.0
+            autocorr = autocorr / baseline  # Normalize
 
             if len(autocorr) > period:
                 cycle_strength = abs(autocorr[period])
@@ -273,7 +276,7 @@ class DeterministicAnalyzer:
 
     def _calculate_correlations(
         self, rest: np.ndarray, climate: np.ndarray, clarity: np.ndarray
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Calculate pairwise correlations between symptoms."""
         correlations = {}
 
@@ -298,7 +301,7 @@ class DeterministicAnalyzer:
 
         return correlations
 
-    def _analyze_trend(self, values: np.ndarray) -> Tuple[str, float]:
+    def _analyze_trend(self, values: np.ndarray) -> tuple[str, float]:
         """Analyze overall trend direction and strength."""
         if len(values) < self.min_data_points:
             return "unknown", 0.0
@@ -320,7 +323,7 @@ class DeterministicAnalyzer:
 
         return direction, strength
 
-    def _detect_outliers(self, entries: List[Dict], values: np.ndarray) -> List[str]:
+    def _detect_outliers(self, entries: list[dict], values: np.ndarray) -> list[str]:
         """Detect outlier days using IQR method."""
         if len(values) < self.min_data_points:
             return []
@@ -346,8 +349,8 @@ class DeterministicAnalyzer:
         return outliers[:5]  # Limit to top 5
 
     def _detect_change_points(
-        self, entries: List[Dict], values: np.ndarray
-    ) -> List[str]:
+        self, entries: list[dict], values: np.ndarray
+    ) -> list[str]:
         """Detect significant change points in the time series."""
         if len(values) < 14:  # Need at least 2 weeks
             return []
@@ -391,7 +394,7 @@ class DeterministicAnalyzer:
     # Risk Assessment (Deterministic Rules)
     # ========================================================================
 
-    def assess_risk_level(self, entries: List[Dict]) -> Dict:
+    def assess_risk_level(self, entries: list[dict]) -> dict:
         """
         Urgency Scoring & Trigger Logic.
 
@@ -494,7 +497,7 @@ class DeterministicAnalyzer:
             "rationale": self._generate_risk_rationale(level, flags, risk_score),
         }
 
-    def _generate_risk_rationale(self, level: str, flags: List[str], score: int) -> str:
+    def _generate_risk_rationale(self, level: str, flags: list[str], score: int) -> str:
         """Generate human-readable rationale for risk level."""
         rationale_map = {
             "persistent_poor_sleep": "Sleep disruption severity above 7/10 for past week",

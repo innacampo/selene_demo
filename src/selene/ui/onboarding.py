@@ -7,12 +7,12 @@ Handles the initial user journey:
 3. Persistence: Saving the foundational 'User Profile' for lifelong context injection.
 """
 
-import streamlit as st
 import json
-from pathlib import Path
+import logging
 from datetime import datetime
 
-import logging
+import streamlit as st
+
 from selene import settings
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def load_profile() -> dict | None:
     logger.debug("load_profile: ENTER")
     if PROFILE_PATH.exists():
         try:
-            with open(PROFILE_PATH, "r", encoding="utf-8") as f:
+            with open(PROFILE_PATH, encoding="utf-8") as f:
                 profile = json.load(f)
                 logger.debug(f"load_profile: loaded profile keys={list(profile.keys())}")
                 return profile
@@ -78,7 +78,7 @@ def profile_exists() -> bool:
 def _load_stages_metadata() -> dict:
     """Load stage definitions from the centralized metadata file (cached)."""
     try:
-        with open(settings.STAGES_METADATA_PATH, "r", encoding="utf-8") as f:
+        with open(settings.STAGES_METADATA_PATH, encoding="utf-8") as f:
             data = json.load(f)
             logger.debug(f"_load_stages_metadata: loaded {len(data.get('stages', {}))} stages")
             return data.get("stages", {})
@@ -88,7 +88,6 @@ def _load_stages_metadata() -> dict:
 
 
 from selene.constants import NEURO_SYMPTOM_DESCRIPTIONS as NEURO_SYMPTOMS
-
 
 # ============================================================================
 # Onboarding UI

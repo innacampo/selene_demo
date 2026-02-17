@@ -8,14 +8,14 @@ This module manages the lifecycle of chat sessions, providing:
 - Lightweight metadata for tracking RAG quality and source attribution.
 """
 
-import uuid
-import time
 import logging
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-import streamlit as st
+import time
+import uuid
 from datetime import datetime
-from typing import Optional
+
+import chromadb
+import streamlit as st
+from chromadb.config import Settings as ChromaSettings
 
 from selene import settings
 
@@ -77,8 +77,8 @@ def _get_chat_client():
 def query_chat_history(
     query: str,
     top_k: int = 5,
-    role_filter: Optional[str] = None,
-    exclude_session_id: Optional[str] = None,
+    role_filter: str | None = None,
+    exclude_session_id: str | None = None,
 ) -> list[dict]:
     """
     Perform a semantic vector search over past chat messages.
@@ -235,7 +235,7 @@ def save_message(
         logger.info(f"save_message: saved {doc_id}")
         return True
 
-    except Exception as e:
+    except Exception:
         logger.exception(f"Failed to save message {doc_id}")
         return False
 
@@ -453,6 +453,6 @@ def delete_session(session_id: str) -> bool:
             logger.debug(f"delete_session: no ids found for {session_id}")
         return True
 
-    except Exception as e:
+    except Exception:
         logger.exception(f"Failed to delete session {session_id}")
         return False

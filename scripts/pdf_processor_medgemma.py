@@ -9,12 +9,11 @@ This module provides a specialized pipeline for preparing medical journal PDFs:
 """
 
 import json
-import re
-from pathlib import Path
-from typing import Dict, List, Optional
-from datetime import datetime
-
 import logging
+import re
+from datetime import datetime
+from pathlib import Path
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -103,15 +102,15 @@ def clean_pdf_text(text: str) -> str:
     # 5. Final Formatting: Strip excessive whitespace
     text = re.sub(r'\s+', ' ', text) # Collapse multiple spaces/newlines
     text = re.sub(r'\n\s*\n', '\n', text) # Remove empty lines
-    
+
     return text.strip()
 
 
 def chunk_text_medgemma(
     text: str,
-    chunk_size: int = 1500, 
+    chunk_size: int = 1500,
     overlap: int = 300,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """
     Split text into semantic chunks while tracking and injecting clinical sections.
     
@@ -130,7 +129,7 @@ def chunk_text_medgemma(
     # Expanded regex to catch common medical journal section headers
     # \s* handles indentation, ^... ensures we catch lines starting with these keywords
     header_pattern = re.compile(
-        r"^\s*(?:\d+\.?\s+)?(ABSTRACT|INTRODUCTION|METHODS|RESULTS|DISCUSSION|CONCLUSION|SAFETY|DOSAGE|ADVERSE EFFECTS|LIMITATIONS|TREATMENT|PARTICIPANTS)", 
+        r"^\s*(?:\d+\.?\s+)?(ABSTRACT|INTRODUCTION|METHODS|RESULTS|DISCUSSION|CONCLUSION|SAFETY|DOSAGE|ADVERSE EFFECTS|LIMITATIONS|TREATMENT|PARTICIPANTS)",
         re.IGNORECASE | re.MULTILINE
     )
 
@@ -141,7 +140,7 @@ def chunk_text_medgemma(
     while start < len(text):
         # Determine initial end point
         end = min(start + chunk_size, len(text))
-        
+
         # 1. Look ahead for section changes to update current_section
         # Looking slightly ahead (300 chars) helps detect if a new section starts right after this chunk
         search_window = text[start:min(end + 300, len(text))]
@@ -168,7 +167,7 @@ def chunk_text_medgemma(
             # Power Move: Explicitly label the content so the LLM identifies the context immediately
             # This is extremely effective for 4b parameter models with limited attention.
             labeled_content = f"[{current_section.upper()}] {chunk_content}"
-            
+
             chunks.append({
                 "content": labeled_content,
                 "section": current_section
@@ -177,7 +176,7 @@ def chunk_text_medgemma(
         # Base case: we reached the end of the text
         if end >= len(text):
             break
-        
+
         # Advance the window with overlap
         start = end - overlap
 
@@ -197,7 +196,7 @@ def create_source_name(filename: str) -> str:
     return Path(filename).stem
 
 
-def process_pdf(pdf_path: str, chunk_size: int = 1500, overlap: int = 300) -> Dict:
+def process_pdf(pdf_path: str, chunk_size: int = 1500, overlap: int = 300) -> dict:
     """
     Process PDF file: extract text, remove references, create chunks.
 
@@ -241,18 +240,18 @@ def process_pdf(pdf_path: str, chunk_size: int = 1500, overlap: int = 300) -> Di
             "overlap": overlap,
         }
 
-    except Exception as e:
+    except Exception:
         logger.exception(f"process_pdf: Error processing {pdf_path}")
         return None
 
 
 def process_pdfs_to_json(
     pdf_dir: str,
-    output_file: Optional[str] = None,
+    output_file: str | None = None,
     chunk_size: int = 1500,
     overlap: int = 300,
     verbose: bool = True,
-) -> Dict:
+) -> dict:
     """
     Process all PDFs in directory for MedGemma knowledge base.
 
@@ -326,7 +325,7 @@ def process_pdfs_to_json(
             chunk_id = f"{pdf_path.stem}_chunk_{i}"
 
             # Separate the text from the section dictionary
-            document_text = chunk_dict["content"] 
+            document_text = chunk_dict["content"]
             section_label = chunk_dict["section"]
 
             metadata = {
@@ -371,7 +370,7 @@ def process_pdfs_to_json(
 
     if verbose:
         logger.info("process_pdfs_to_json: Export complete")
-        print(f"✓ Export complete!")
+        print("✓ Export complete!")
         print(f"{'=' * 70}\n")
 
     return export_data
@@ -393,13 +392,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chunk-size",
         type=int,
-        default=2000, 
+        default=2000,
         help="Chunk size in characters (default: 2000 ~500 tokens)",
     )
     parser.add_argument(
         "--overlap",
         type=int,
-        default=300, 
+        default=300,
         help="Overlap in characters (default: 300 ~75 tokens)",
     )
     parser.add_argument("--quiet", action="store_true", help="Suppress progress output")
@@ -415,12 +414,12 @@ if __name__ == "__main__":
             all_ids = []
             all_documents = []
             all_metadatas = []
-            
+
             for i, chunk_dict in enumerate(result["chunks"]):
                 chunk_id = f"{path.stem}_chunk_{i}"
                 doc_text = chunk_dict["content"]
                 section = chunk_dict["section"]
-                
+
                 all_ids.append(chunk_id)
                 all_documents.append(doc_text)
                 all_metadatas.append({

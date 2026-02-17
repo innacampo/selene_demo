@@ -6,17 +6,19 @@ reasoning pipeline. Handles report streaming, historical analysis
 filtering, and high-fidelity PDF export.
 """
 
-import streamlit as st
 import io
-import json
+import logging
 import re
 from datetime import datetime, timedelta
 
 import markdown
+import streamlit as st
 from xhtml2pdf import pisa
+
+from selene.core.insights_generator import format_report_for_pdf, generate_insights_report
 from selene.ui.navigation import render_header_with_back
-from selene.storage.data_manager import get_filtered_pulse_history
-from selene.core.insights_generator import generate_insights_report, format_report_for_pdf
+
+logger = logging.getLogger(__name__)
 
 _PDF_CSS = """
 @page {
@@ -86,6 +88,12 @@ def generate_insights_pdf(report_data: dict) -> bytes:
     the whole document to PDF via *xhtml2pdf*.
     """
 
+    logger.debug(
+        "generate_insights_pdf: ENTER title=%s content_len=%d",
+        report_data.get("title", ""),
+        len(report_data.get("report_content", "")),
+    )
+
     # Convert the markdown report body to HTML
     md_extensions = ["extra", "sane_lists", "smarty", "nl2br"]
     report_html = markdown.markdown(
@@ -115,9 +123,12 @@ def generate_insights_pdf(report_data: dict) -> bytes:
     pdf_buffer = io.BytesIO()
     pisa_status = pisa.CreatePDF(io.StringIO(html), dest=pdf_buffer)
     if pisa_status.err:
+        logger.error("generate_insights_pdf: xhtml2pdf conversion failed err=%s", pisa_status.err)
         raise RuntimeError(f"xhtml2pdf conversion failed (errors: {pisa_status.err})")
 
-    return pdf_buffer.getvalue()
+    pdf_bytes = pdf_buffer.getvalue()
+    logger.info("generate_insights_pdf: SUCCESS bytes=%d", len(pdf_bytes))
+    return pdf_bytes
 
 def _split_report_sections(report_text: str) -> list[tuple[str, str]]:
     """Split a markdown report into (header, body) pairs on ### boundaries."""
@@ -130,11 +141,13 @@ def _split_report_sections(report_text: str) -> list[tuple[str, str]]:
         # First line is the header, rest is the body
         header, _, body = part.partition("\n")
         sections.append((header.strip(), body.strip()))
+    logger.debug("_split_report_sections: sections=%d", len(sections))
     return sections
 
 
 def render_clinical():
     """Render the clinical summary page with AI insights."""
+    logger.debug("render_clinical: ENTER")
     render_header_with_back("back_clinical")
 
     st.markdown(
@@ -156,6 +169,7 @@ def render_clinical():
     if isinstance(date_range, tuple) and len(date_range) == 2:
         start_date_dt = datetime.combine(date_range[0], datetime.min.time())
         end_date_dt = datetime.combine(date_range[1], datetime.max.time())
+        logger.info("render_clinical: selected range %s -> %s", date_range[0], date_range[1])
 
         # Check if we need to regenerate
         last_range = st.session_state.get("last_clinical_range")
@@ -163,31 +177,42 @@ def render_clinical():
 
         # Generate report if not exists or date range changed
         if (
-            "clinical_report" not in st.session_state 
+            "clinical_report" not in st.session_state
             or last_range != current_range
         ):
+            logger.debug(
+                "render_clinical: generating report cached=%s range_changed=%s",
+                "clinical_report" in st.session_state,
+                last_range != current_range,
+            )
             with st.spinner("Generating insights report..."):
-                success, result, metrics = generate_insights_report(  
+                success, result, metrics = generate_insights_report(
                     start_date=start_date_dt,
                     end_date=end_date_dt
                 )
-                
+
                 if success:
                     # Store with consistent key
                     st.session_state.clinical_report = result
                     st.session_state.last_clinical_range = current_range
                     st.session_state.clinical_metrics = metrics
+                    logger.info(
+                        "render_clinical: report generated chars=%d has_metrics=%s",
+                        len(result),
+                        metrics is not None,
+                    )
                     st.success("Report generated successfully!")
                 else:
+                    logger.error("render_clinical: report generation failed error=%s", result)
                     st.error(f"{result}")
                     # Clear old report on error
                     if "clinical_report" in st.session_state:
                         del st.session_state.clinical_report
-    
+
         # Display the report if it exists
         if "clinical_report" in st.session_state:
             report_text = st.session_state.clinical_report
-            
+
             """ # Optional: Display metrics
             if "clinical_metrics" in st.session_state:
                 metrics = st.session_state.clinical_metrics
@@ -202,17 +227,18 @@ def render_clinical():
                     with col4:
                         completeness_pct = int(metrics['context_completeness'] * 100)
                         st.metric("Data Quality", f"{completeness_pct}%") """
-            
+
             # Display the report split into visual blocks per section
             st.markdown("---")
             sections = _split_report_sections(report_text)
-            
-                        
+            logger.debug("render_clinical: rendering sections=%d", len(sections))
+
+
             for header, body in sections:
                 with st.container(border=True):
                     st.markdown(f"### {header}")
                     st.markdown(body)
-            
+
             st.markdown("---")
 
             # Export button (Centered)
@@ -220,19 +246,20 @@ def render_clinical():
             with col2:
                 # Prepare PDF for export
                 user_profile = st.session_state.get("user_profile", {})
-                
+
                 # Pass metrics to PDF formatter if available
                 metrics_for_pdf = st.session_state.get("clinical_metrics")
                 report_data = format_report_for_pdf(
-                    report_text, 
+                    report_text,
                     user_profile,
                     metrics_for_pdf
                 )
-                
+
                 # Update date range in title for the PDF
                 report_data["title"] = f"Clinical Summary ({date_range[0]} to {date_range[1]})"
                 pdf_bytes = generate_insights_pdf(report_data)
-                    
+                logger.info("render_clinical: PDF prepared bytes=%d", len(pdf_bytes))
+
                 st.download_button(
                     label="Export PDF",
                     data=pdf_bytes,
@@ -242,6 +269,7 @@ def render_clinical():
                 )
         else:
             st.info("Select a date range above to generate your clinical insights report.")
-            
+
     else:
+        logger.debug("render_clinical: incomplete date range selected")
         st.info("Please select a complete date range (Start and End date).")

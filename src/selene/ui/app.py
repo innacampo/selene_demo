@@ -10,14 +10,19 @@ user onboarding workflow.
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from selene import settings
+
 import streamlit as st
+
+from selene import settings
 
 
 @st.cache_resource
 def _setup_logging():
     """Configure root logger once — cached to avoid duplicate handlers on rerun."""
     root_logger = logging.getLogger()
+    if getattr(root_logger, "_selene_logging_configured", False):
+        return root_logger
+
     root_logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper(), logging.DEBUG))
 
     formatter = logging.Formatter(settings.LOG_FORMAT, datefmt=settings.LOG_DATEFMT)
@@ -49,16 +54,23 @@ def _setup_logging():
     except Exception:
         pass
 
+    root_logger._selene_logging_configured = True
+    root_logger.info(
+        "Logging configured: level=%s file_logging=%s",
+        settings.LOG_LEVEL.upper(),
+        settings.LOG_TO_FILE,
+    )
+
     return root_logger
 
 
 _setup_logging()
+logger = logging.getLogger(__name__)
 
 from selene.config import init_page_config, init_session_state
-from selene.ui.styles import load_css
-from selene.ui.views import render_home, render_chat, render_clinical, render_pulse
 from selene.ui.onboarding import render_onboarding
-
+from selene.ui.styles import load_css
+from selene.ui.views import render_chat, render_clinical, render_home, render_pulse
 
 # ----------------------------
 # Page Router
@@ -85,22 +97,32 @@ def main() -> None:
     on every interaction but only imports this module once. Placing them
     inside main() guarantees they run on every rerun cycle.
     """
+    logger.debug("main: ENTER")
     init_page_config()
     init_session_state()
     load_css()
 
+    logger.debug(
+        "main: session initialized onboarding_complete=%s page=%s",
+        st.session_state.get("onboarding_complete", False),
+        st.session_state.get("page", "home"),
+    )
+
     # Check if onboarding is complete
     if not st.session_state.get("onboarding_complete", False):
+        logger.info("main: onboarding incomplete; rendering onboarding")
         render_onboarding()
         return
-    
+
     # Normal app flow
     current_page = st.session_state.get("page", "home")
 
     if current_page in PAGE_ROUTES:
+        logger.info("main: rendering page '%s'", current_page)
         PAGE_ROUTES[current_page]()
     else:
         # Fallback to home if unknown page
+        logger.warning("main: unknown page '%s'; falling back to home", current_page)
         render_home()
 
 

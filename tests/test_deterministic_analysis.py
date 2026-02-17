@@ -5,8 +5,6 @@ Covers: DeterministicAnalyzer – symptom mapping, statistics, pattern detection
 risk assessment, and formatting helpers.
 """
 
-import sys
-from pathlib import Path
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -14,12 +12,11 @@ import pytest
 
 from selene.core.deterministic_analysis import (
     DeterministicAnalyzer,
-    SymptomStatistics,
     PatternAnalysis,
-    format_statistics_summary,
+    SymptomStatistics,
     format_pattern_summary,
+    format_statistics_summary,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

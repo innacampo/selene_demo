@@ -7,13 +7,8 @@ management helpers (clear_all_caches, invalidate_*).
 """
 
 import sys
-import time
-import hashlib
-from pathlib import Path
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 # Streamlit must be patched before importing med_logic.
 _st_mock = MagicMock()
@@ -33,17 +28,16 @@ _st_mock.session_state = {}
 from selene.core.med_logic import (
     CacheEntry,
     TTLCache,
-    generate_cache_key,
-    get_user_context_hash,
+    clear_all_caches,
     contextualized_query_cache,
+    generate_cache_key,
+    get_cache_stats,
+    get_user_context_hash,
+    invalidate_rag_cache,
+    invalidate_user_context_cache,
     rag_cache,
     user_context_cache,
-    clear_all_caches,
-    invalidate_user_context_cache,
-    invalidate_rag_cache,
-    get_cache_stats,
 )
-
 
 # ===================================================================
 # CacheEntry

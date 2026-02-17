@@ -6,19 +6,19 @@ This example demonstrates how to use SELENE's core functionality
 programmatically without the Streamlit UI.
 """
 
-from selene.storage.data_manager import load_pulse_history
+from selene.core.context_builder import build_user_context
 from selene.core.context_builder_multi_agent import load_user_profile
 from selene.core.deterministic_analysis import DeterministicAnalyzer
-from selene.core.context_builder import build_user_context
+from selene.storage.data_manager import load_pulse_history
 
 
 def main():
     """Run basic SELENE functionality examples."""
-    
+
     print("=" * 60)
     print("SELENE Basic Usage Example")
     print("=" * 60)
-    
+
     # Example 1: Load user profile
     print("\n1. Loading user profile...")
     try:
@@ -29,7 +29,7 @@ def main():
             print("   ℹ No profile found (run onboarding first)")
     except Exception as e:
         print(f"   ✗ Error: {e}")
-    
+
     # Example 2: Load pulse history
     print("\n2. Loading pulse history...")
     try:
@@ -40,7 +40,7 @@ def main():
             print(f"   Latest entry: {latest.get('date', 'Unknown date')}")
     except Exception as e:
         print(f"   ✗ Error: {e}")
-    
+
     # Example 3: Analyze symptoms
     print("\n3. Analyzing symptoms...")
     try:
@@ -53,7 +53,7 @@ def main():
             print("   ℹ No pulse data available for analysis")
     except Exception as e:
         print(f"   ✗ Error: {e}")
-    
+
     # Example 4: Build user context
     print("\n4. Building user context...")
     try:
@@ -63,7 +63,7 @@ def main():
             print(f"   Preview: {context[:100]}...")
     except Exception as e:
         print(f"   ✗ Error: {e}")
-    
+
     # Example 5: Risk assessment
     print("\n5. Assessing risk...")
     try:
@@ -78,7 +78,7 @@ def main():
             print("   ℹ No pulse data available for risk assessment")
     except Exception as e:
         print(f"   ✗ Error: {e}")
-    
+
     print("\n" + "=" * 60)
     print("Example complete!")
     print("=" * 60)

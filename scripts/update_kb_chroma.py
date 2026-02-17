@@ -10,10 +10,10 @@ This script provides tools for:
 
 import json
 import logging
+from pathlib import Path
+
 import chromadb
 from chromadb.config import Settings as ChromaSettings
-from pathlib import Path
-from typing import List, Dict, Tuple
 
 from selene import settings
 
@@ -82,7 +82,7 @@ def import_to_local_db(
 
     # Load JSON
     logger.info(f"Loading {json_file}")
-    with open(json_file, "r", encoding="utf-8") as f:
+    with open(json_file, encoding="utf-8") as f:
         data = json.load(f)
 
     # Validate format
@@ -142,7 +142,7 @@ def import_to_local_db(
             imported += len(batch_ids)
             logger.info(f"Progress: {imported}/{total} ({100 * imported / total:.1f}%)")
 
-        except Exception as e:
+        except Exception:
             logger.exception("import_to_local_db: Batch failed - exception adding batch to collection")
             errors += len(batch_ids)
 
@@ -180,7 +180,7 @@ def query_with_sources(
     db_path: str = settings.DB_PATH,
     collection_name: str = settings.MEDICAL_DOCS_COLLECTION,
     n_results: int = 5,
-) -> Tuple[List[str], List[str], List[Dict], List[float]]:
+) -> tuple[list[str], list[str], list[dict], list[float]]:
     """
     Search the vector database and extract unique source names.
 
@@ -227,7 +227,7 @@ def query_with_sources(
 
 
 def format_response_with_citations(
-    query: str, llm_response: str, sources: List[str]
+    query: str, llm_response: str, sources: list[str]
 ) -> str:
     """
     Format LLM response with citations appended.
@@ -324,7 +324,7 @@ def get_collection_stats(
     logger.info("get_collection_stats: Retrieved collection statistics")
     logger.info(f"  Total chunks: {collection.count()}")
     logger.info(f"  Unique sources: {len(unique_sources)}")
-    logger.debug(f"get_collection_stats: Sources sample: {list(sorted(unique_sources))[:10]}")
+    logger.debug(f"get_collection_stats: Sources sample: {sorted(unique_sources)[:10]}")
 
     print(f"\n{'=' * 60}")
     print("COLLECTION STATISTICS")

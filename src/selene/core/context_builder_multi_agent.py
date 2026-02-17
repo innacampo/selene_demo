@@ -6,20 +6,19 @@ context structure for downstream analysis.
 """
 
 import json
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
 import logging
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 
 import streamlit as st
+
 from selene import settings
-from selene.storage.data_manager import load_pulse_history, get_filtered_pulse_history
+from selene.storage.data_manager import get_filtered_pulse_history
 
 logger = logging.getLogger(__name__)
 
 # Configuration
-USER_PROFILE_FILE = settings.USER_DATA_DIR / "user_profile.json"
+USER_PROFILE_FILE = settings.PROFILE_PATH
 NOTES_FILE = settings.USER_DATA_DIR / "notes.json"
 
 
@@ -36,7 +35,7 @@ class ContextMetadata:
     data_completeness_score: float  # 0-1 score
 
 
-def load_user_profile() -> Dict:
+def load_user_profile() -> dict:
     """
     Load user profile with validation.
     
@@ -50,19 +49,19 @@ def load_user_profile() -> Dict:
             "neuro_symptoms": [],
             "profile_complete": False
         }
-    
+
     try:
-        with open(USER_PROFILE_FILE, "r", encoding="utf-8") as f:
+        with open(USER_PROFILE_FILE, encoding="utf-8") as f:
             profile = json.load(f)
-        
+
         # Validate required fields
         profile.setdefault("stage_title", "Unknown")
         profile.setdefault("neuro_symptoms", [])
         profile["profile_complete"] = True
-        
+
         logger.debug(f"Loaded profile: stage={profile['stage_title']}")
         return profile
-        
+
     except json.JSONDecodeError as e:
         logger.error(f"Profile JSON error: {e}")
         return {"stage_title": "Unknown", "neuro_symptoms": [], "profile_complete": False}
@@ -71,8 +70,8 @@ def load_user_profile() -> Dict:
         return {"stage_title": "Unknown", "neuro_symptoms": [], "profile_complete": False}
 
 
-def load_notes(start_date: Optional[datetime] = None, 
-               end_date: Optional[datetime] = None) -> Tuple[str, int]:
+def load_notes(start_date: datetime | None = None,
+               end_date: datetime | None = None) -> tuple[str, int]:
     """
     Load and aggregate notes within date range.
     
@@ -85,20 +84,20 @@ def load_notes(start_date: Optional[datetime] = None,
     """
     if not NOTES_FILE.exists():
         return "No notes available.", 0
-    
+
     try:
-        with open(NOTES_FILE, "r", encoding="utf-8") as f:
+        with open(NOTES_FILE, encoding="utf-8") as f:
             notes_data = json.load(f)
-        
+
         if not isinstance(notes_data, list):
             return "No notes available.", 0
-        
+
         filtered_notes = []
-        
+
         for note in notes_data:
             if not isinstance(note, dict):
                 continue
-            
+
             # Date filtering if specified
             if start_date or end_date:
                 try:
@@ -109,20 +108,20 @@ def load_notes(start_date: Optional[datetime] = None,
                         continue
                 except (KeyError, ValueError):
                     continue
-            
+
             # Aggregate note content
             note_text = note.get("content", note.get("text", ""))
             if note_text:
                 timestamp = note.get("timestamp", "")
                 filtered_notes.append(f"[{timestamp}] {note_text}")
-        
+
         if not filtered_notes:
             return "No notes in this period.", 0
-        
+
         aggregated = "\n\n".join(filtered_notes)
         logger.debug(f"Loaded {len(filtered_notes)} notes")
         return aggregated, len(filtered_notes)
-        
+
     except json.JSONDecodeError:
         logger.error("Notes JSON decode error")
         return "Notes file corrupted.", 0
@@ -131,8 +130,8 @@ def load_notes(start_date: Optional[datetime] = None,
         return "Error loading notes.", 0
 
 
-def load_chat_context(start_date: Optional[datetime] = None,
-                      end_date: Optional[datetime] = None) -> Tuple[str, int]:
+def load_chat_context(start_date: datetime | None = None,
+                      end_date: datetime | None = None) -> tuple[str, int]:
     """
     Load user chat messages (not assistant responses) within date range.
 
@@ -189,7 +188,7 @@ def load_chat_context(start_date: Optional[datetime] = None,
         return "No chat history available.", 0
 
 
-def calculate_completeness_score(context: Dict) -> float:
+def calculate_completeness_score(context: dict) -> float:
     """
     Calculate data completeness score (0-1).
     
@@ -200,28 +199,28 @@ def calculate_completeness_score(context: Dict) -> float:
     - Has chat history (0.2)
     """
     score = 0.0
-    
+
     if context.get("profile", {}).get("profile_complete"):
         score += 0.2
-    
+
     if len(context.get("pulse_entries", [])) > 0:
         score += 0.4
-    
+
     if context["metadata"]["notes_count"] > 0:
         score += 0.2
-    
+
     if context["metadata"]["chat_message_count"] > 0:
         score += 0.2
-    
+
     return round(score, 2)
 
 
 @st.cache_data(ttl=300, show_spinner=False)
 def build_complete_context(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     default_days: int = 30
-) -> Dict:
+) -> dict:
     """
     Build unified context from all data sources.
     
@@ -239,22 +238,22 @@ def build_complete_context(
             - metadata: ContextMetadata
     """
     logger.info("Building complete context")
-    
+
     # Determine date range
     if end_date is None:
         end_date = datetime.now()
-    
+
     if start_date is None:
         start_date = end_date - timedelta(days=default_days)
-    
+
     logger.debug(f"Date range: {start_date.date()} to {end_date.date()}")
-    
+
     # Load all data sources
     profile = load_user_profile()
     pulse_entries = get_filtered_pulse_history(start_date, end_date)
     all_notes, notes_count = load_notes(start_date, end_date)
     chat_context, chat_count = load_chat_context(start_date, end_date)
-    
+
     # Build metadata
     metadata = ContextMetadata(
         pulse_entry_count=len(pulse_entries),
@@ -266,7 +265,7 @@ def build_complete_context(
         has_profile=profile.get("profile_complete", False),
         data_completeness_score=0.0  # Will calculate below
     )
-    
+
     # Assemble context
     context = {
         "profile": profile,
@@ -275,18 +274,18 @@ def build_complete_context(
         "chat_context": chat_context,
         "metadata": asdict(metadata)
     }
-    
+
     # Calculate and update completeness
     context["metadata"]["data_completeness_score"] = calculate_completeness_score(context)
-    
+
     logger.info(f"Context built: {metadata.pulse_entry_count} pulse entries, "
                 f"{metadata.notes_count} notes, {metadata.chat_message_count} messages, "
                 f"completeness: {context['metadata']['data_completeness_score']}")
-    
+
     return context
 
 
-def get_context_summary(context: Dict) -> str:
+def get_context_summary(context: dict) -> str:
     """
     Generate human-readable summary of context.
     
@@ -297,10 +296,10 @@ def get_context_summary(context: Dict) -> str:
         Formatted summary string
     """
     meta = context["metadata"]
-    
+
     date_start = datetime.fromisoformat(meta["date_range_start"]).strftime("%Y-%m-%d")
     date_end = datetime.fromisoformat(meta["date_range_end"]).strftime("%Y-%m-%d")
-    
+
     summary = f"""
 Context Summary
 ===============
@@ -312,5 +311,5 @@ Chat Messages: {meta['chat_message_count']}
 Data Completeness: {meta['data_completeness_score'] * 100:.0f}%
 Generated: {datetime.fromisoformat(meta['context_generated_at']).strftime('%Y-%m-%d %H:%M:%S')}
 """
-    
+
     return summary.strip()

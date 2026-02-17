@@ -9,8 +9,9 @@ Captures metrics across three core neuroendocrine pillars:
 """
 
 import streamlit as st
-from selene.ui.navigation import render_header_with_back
+
 from selene.storage.data_manager import save_pulse_entry
+from selene.ui.navigation import render_header_with_back
 
 
 def render_pulse():
