@@ -5,6 +5,7 @@ Single source of truth for all configuration constants: paths, model
 identifiers, API endpoints, and tuning parameters. Import from here
 instead of hardcoding values across modules.
 """
+
 import os
 
 # Force libraries to only look for local files — must be set before
@@ -62,9 +63,9 @@ MAX_SESSIONS_SHOWN = 20
 # Caching
 # ============================================================================
 
-CONTEXTUALIZED_QUERY_CACHE_TTL = 300   # 5 minutes
-RAG_CACHE_TTL = 600                    # 10 minutes
-USER_CONTEXT_CACHE_TTL = 180           # 3 minutes
+CONTEXTUALIZED_QUERY_CACHE_TTL = 300  # 5 minutes
+RAG_CACHE_TTL = 600  # 10 minutes
+USER_CONTEXT_CACHE_TTL = 180  # 3 minutes
 MAX_CACHE_SIZE = 100
 
 # ============================================================================
@@ -108,5 +109,8 @@ def get_embedding_function():
     global _embedding_function_instance
     if _embedding_function_instance is None:
         from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-        _embedding_function_instance = SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL)
+
+        _embedding_function_instance = SentenceTransformerEmbeddingFunction(
+            model_name=EMBEDDING_MODEL
+        )
     return _embedding_function_instance

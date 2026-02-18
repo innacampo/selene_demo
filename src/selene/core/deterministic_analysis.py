@@ -114,7 +114,9 @@ class DeterministicAnalyzer:
         Returns:
             SymptomStatistics object or None if insufficient data
         """
-        logger.debug(f"analyze_symptom_statistics: ENTER symptom_key={symptom_key} entries={len(entries)}")
+        logger.debug(
+            f"analyze_symptom_statistics: ENTER symptom_key={symptom_key} entries={len(entries)}"
+        )
         # Extract and map values
         raw_values = [e.get(symptom_key) for e in entries if symptom_key in e]
         values = [self._map_symptom_to_score(v) for v in raw_values]
@@ -122,7 +124,9 @@ class DeterministicAnalyzer:
 
         logger.debug(f"analyze_symptom_statistics: mapped_values_count={len(values)}")
         if len(values) < self.min_data_points:
-            logger.info(f"analyze_symptom_statistics: insufficient data ({len(values)} < {self.min_data_points})")
+            logger.info(
+                f"analyze_symptom_statistics: insufficient data ({len(values)} < {self.min_data_points})"
+            )
             return None
 
         values = np.array(values)
@@ -142,9 +146,7 @@ class DeterministicAnalyzer:
         recent_avg = np.mean(recent_values)
         previous_avg = np.mean(previous_values)
         percent_change = (
-            ((recent_avg - previous_avg) / previous_avg * 100)
-            if previous_avg > 0
-            else 0
+            ((recent_avg - previous_avg) / previous_avg * 100) if previous_avg > 0 else 0
         )
 
         # Linear regression for trend
@@ -218,11 +220,11 @@ class DeterministicAnalyzer:
         has_weekly, weekly_conf = self._detect_cycle(rest_values, period=7)
         has_monthly, monthly_conf = self._detect_cycle(rest_values, period=28)
 
-        logger.debug(f"detect_patterns: weekly={has_weekly} (conf={weekly_conf}), monthly={has_monthly} (conf={monthly_conf})")
-        # 2. Correlation analysis
-        correlations = self._calculate_correlations(
-            rest_values, climate_values, clarity_values
+        logger.debug(
+            f"detect_patterns: weekly={has_weekly} (conf={weekly_conf}), monthly={has_monthly} (conf={monthly_conf})"
         )
+        # 2. Correlation analysis
+        correlations = self._calculate_correlations(rest_values, climate_values, clarity_values)
         logger.debug(f"detect_patterns: correlations={correlations}")
         # 3. Trend analysis
         trend_dir, trend_strength = self._analyze_trend(rest_values)
@@ -256,9 +258,7 @@ class DeterministicAnalyzer:
 
         # Calculate autocorrelation at the specified lag
         try:
-            autocorr = np.correlate(
-                values - np.mean(values), values - np.mean(values), mode="full"
-            )
+            autocorr = np.correlate(values - np.mean(values), values - np.mean(values), mode="full")
             autocorr = autocorr[len(autocorr) // 2 :]
             baseline = autocorr[0]
             if np.isclose(baseline, 0.0):
@@ -339,18 +339,14 @@ class DeterministicAnalyzer:
         for i, val in enumerate(values):
             if val < lower_bound or val > upper_bound:
                 try:
-                    date = datetime.fromisoformat(entries[i]["timestamp"]).strftime(
-                        "%Y-%m-%d"
-                    )
+                    date = datetime.fromisoformat(entries[i]["timestamp"]).strftime("%Y-%m-%d")
                     outliers.append(date)
                 except (KeyError, ValueError, IndexError):
                     pass
 
         return outliers[:5]  # Limit to top 5
 
-    def _detect_change_points(
-        self, entries: list[dict], values: np.ndarray
-    ) -> list[str]:
+    def _detect_change_points(self, entries: list[dict], values: np.ndarray) -> list[str]:
         """Detect significant change points in the time series."""
         if len(values) < 14:  # Need at least 2 weeks
             return []
@@ -367,9 +363,7 @@ class DeterministicAnalyzer:
 
             if p_value < 0.05:  # Significant change
                 try:
-                    date = datetime.fromisoformat(entries[i]["timestamp"]).strftime(
-                        "%Y-%m-%d"
-                    )
+                    date = datetime.fromisoformat(entries[i]["timestamp"]).strftime("%Y-%m-%d")
                     change_points.append(date)
                 except (KeyError, ValueError, IndexError):
                     pass
@@ -440,9 +434,7 @@ class DeterministicAnalyzer:
         # Flag 2: Rapid deterioration
         if len(entries) >= 14:
             prev_week = entries[-14:-7]
-            prev_rest_raw = [
-                self._map_symptom_to_score(e.get("rest")) for e in prev_week
-            ]
+            prev_rest_raw = [self._map_symptom_to_score(e.get("rest")) for e in prev_week]
             prev_rest_vals = [v for v in prev_rest_raw if v is not None]
             prev_rest = np.mean(prev_rest_vals) if prev_rest_vals else 0
             recent_rest = np.mean(rest_values) if rest_values else 0
@@ -510,9 +502,7 @@ class DeterministicAnalyzer:
 
         rationales = [rationale_map.get(flag, flag) for flag in flags]
 
-        return f"Risk level: {level.upper()} (score: {score}/10). " + "; ".join(
-            rationales
-        )
+        return f"Risk level: {level.upper()} (score: {score}/10). " + "; ".join(rationales)
 
 
 # ========================================================================
@@ -552,13 +542,7 @@ def format_pattern_summary(patterns: PatternAnalysis) -> str:
     if patterns.correlations:
         summary_parts.append("- Symptom correlations:")
         for pair, corr in patterns.correlations.items():
-            strength = (
-                "strong"
-                if abs(corr) > 0.7
-                else "moderate"
-                if abs(corr) > 0.4
-                else "weak"
-            )
+            strength = "strong" if abs(corr) > 0.7 else "moderate" if abs(corr) > 0.4 else "weak"
             direction = "positive" if corr > 0 else "negative"
             summary_parts.append(f"  • {pair}: {strength} {direction} ({corr:+.2f})")
 

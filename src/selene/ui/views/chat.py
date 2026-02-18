@@ -48,21 +48,20 @@ def _init_chat_state() -> None:
         st.session_state.chat_persisted_count,
     )
 
+
 def _add_message(role: str, content: str, rag_sources: list[str] = None) -> None:
     """
     Append a message to the local state and persist it to the database.
-    
+
     Args:
         role: "user" or "bot".
         content: The message text.
         rag_sources: Optional list of research sources used for the response.
     """
-    st.session_state.chat_history.append({
-        "role": role,
-        "content": content,
-        "timestamp": datetime.now().strftime("%I:%M %p")
-    })
-    save_message(role, content, len(st.session_state.chat_history)-1, rag_sources or [])
+    st.session_state.chat_history.append(
+        {"role": role, "content": content, "timestamp": datetime.now().strftime("%I:%M %p")}
+    )
+    save_message(role, content, len(st.session_state.chat_history) - 1, rag_sources or [])
     st.session_state.chat_persisted_count = len(st.session_state.chat_history)
     logger.debug(
         "_add_message: role=%s content_len=%d total_messages=%d source_count=%d",
@@ -71,6 +70,7 @@ def _add_message(role: str, content: str, rag_sources: list[str] = None) -> None
         len(st.session_state.chat_history),
         len(rag_sources or []),
     )
+
 
 def render_chat() -> None:
     """
@@ -96,14 +96,14 @@ def render_chat() -> None:
     # Past Sessions Sidebar (Simplified for brevity)
     sessions = list_past_sessions(limit=5)
     curr_id = st.session_state.get("chat_session_id")
-    if [s for s in sessions if s['session_id'] != curr_id]:
+    if [s for s in sessions if s["session_id"] != curr_id]:
         with st.expander("Past Conversations", expanded=False):
             for s in sessions:
-                if s['session_id'] == curr_id:
+                if s["session_id"] == curr_id:
                     continue
-                if st.button(f"{s['first_message'][:40]}...", key=s['session_id']):
-                    logger.info("render_chat: switching to past session id=%s", s['session_id'])
-                    switch_to_session(s['session_id'])
+                if st.button(f"{s['first_message'][:40]}...", key=s["session_id"]):
+                    logger.info("render_chat: switching to past session id=%s", s["session_id"])
+                    switch_to_session(s["session_id"])
                     st.rerun()
 
     # Message Display
@@ -148,12 +148,14 @@ def render_chat() -> None:
                     query=search_query,
                     top_k=Config.CHAT_HISTORY_TOP_K,
                     role_filter="bot",
-                    exclude_session_id=curr_id
+                    exclude_session_id=curr_id,
                 )
 
                 # Format past chats
                 chat_context = ""
-                relevant_chats = [r for r in chat_res if r['distance'] < Config.CHAT_HISTORY_DISTANCE_THRESHOLD]
+                relevant_chats = [
+                    r for r in chat_res if r["distance"] < Config.CHAT_HISTORY_DISTANCE_THRESHOLD
+                ]
                 logger.debug(
                     "render_chat: chat_history matches=%d filtered=%d threshold=%.3f",
                     len(chat_res),
@@ -164,7 +166,7 @@ def render_chat() -> None:
                     # Filter and Truncate
                     formatted_past = []
                     for r in relevant_chats:
-                        content = r['content']
+                        content = r["content"]
                         # CAP at 1000 chars: enough for detail, short enough for 4b attention
                         if len(content) > 1000:
                             content = content[:1000] + "... [Truncated for brevity]"
@@ -177,10 +179,10 @@ def render_chat() -> None:
             # Pass the ORIGINAL prompt + RAW history + RAG context
             full_response = ""
             for chunk in call_medgemma_stream(
-                prompt=prompt, # LLM sees original prompt
+                prompt=prompt,  # LLM sees original prompt
                 context=context,
                 chat_context=chat_context,
-                recent_history=history_buffer, # LLM sees immediate history
+                recent_history=history_buffer,  # LLM sees immediate history
             ):
                 full_response += chunk
                 resp_container.markdown(full_response + "▌")

@@ -19,14 +19,18 @@ from unittest.mock import MagicMock, patch
 _st_mock = MagicMock()
 sys.modules.setdefault("streamlit", _st_mock)
 
+
 # Patch st.cache_data / st.cache_resource so decorated functions run normally
 def _passthrough_decorator(*args, **kwargs):
     """Return function unchanged – removes caching."""
     if args and callable(args[0]):
         return args[0]
+
     def wrapper(fn):
         return fn
+
     return wrapper
+
 
 _st_mock.cache_data = _passthrough_decorator
 _st_mock.cache_resource = _passthrough_decorator
@@ -39,11 +43,10 @@ from selene.core import context_builder_multi_agent as cb_multi
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _pulse_entry(rest="Restorative", climate="Cool", clarity="Focused",
-                 notes="", days_ago=0):
+
+def _pulse_entry(rest="Restorative", climate="Cool", clarity="Focused", notes="", days_ago=0):
     ts = (datetime.now() - timedelta(days=days_ago)).isoformat()
-    return {"rest": rest, "climate": climate, "clarity": clarity,
-            "notes": notes, "timestamp": ts}
+    return {"rest": rest, "climate": climate, "clarity": clarity, "notes": notes, "timestamp": ts}
 
 
 # ===================================================================
@@ -53,22 +56,30 @@ def _pulse_entry(rest="Restorative", climate="Cool", clarity="Focused",
 
 class TestGetUserProfileHash:
     def test_empty_when_no_files(self, tmp_path):
-        with patch.object(cb.settings, "PROFILE_PATH", tmp_path / "nope.json"), \
-             patch.object(cb.settings, "PULSE_HISTORY_FILE", tmp_path / "nope2.json"):
+        with (
+            patch.object(cb.settings, "PROFILE_PATH", tmp_path / "nope.json"),
+            patch.object(cb.settings, "PULSE_HISTORY_FILE", tmp_path / "nope2.json"),
+        ):
             result = cb.get_user_profile_hash()
             assert result == hashlib.md5(b"").hexdigest()
 
     def test_includes_profile_fields(self, tmp_path):
         profile_path = tmp_path / "profile.json"
-        profile_path.write_text(json.dumps({
-            "last_updated": "2026-02-17",
-            "stage": "peri",
-        }))
+        profile_path.write_text(
+            json.dumps(
+                {
+                    "last_updated": "2026-02-17",
+                    "stage": "peri",
+                }
+            )
+        )
         pulse_path = tmp_path / "pulse.json"
         pulse_path.write_text("[]")
 
-        with patch.object(cb.settings, "PROFILE_PATH", profile_path), \
-             patch.object(cb.settings, "PULSE_HISTORY_FILE", pulse_path):
+        with (
+            patch.object(cb.settings, "PROFILE_PATH", profile_path),
+            patch.object(cb.settings, "PULSE_HISTORY_FILE", pulse_path),
+        ):
             h1 = cb.get_user_profile_hash()
             assert isinstance(h1, str) and len(h1) == 32
 
@@ -78,13 +89,17 @@ class TestGetUserProfileHash:
         pulse_path.write_text("[]")
 
         profile_path.write_text(json.dumps({"last_updated": "t1", "stage": "peri"}))
-        with patch.object(cb.settings, "PROFILE_PATH", profile_path), \
-             patch.object(cb.settings, "PULSE_HISTORY_FILE", pulse_path):
+        with (
+            patch.object(cb.settings, "PROFILE_PATH", profile_path),
+            patch.object(cb.settings, "PULSE_HISTORY_FILE", pulse_path),
+        ):
             h1 = cb.get_user_profile_hash()
 
         profile_path.write_text(json.dumps({"last_updated": "t2", "stage": "post"}))
-        with patch.object(cb.settings, "PROFILE_PATH", profile_path), \
-             patch.object(cb.settings, "PULSE_HISTORY_FILE", pulse_path):
+        with (
+            patch.object(cb.settings, "PROFILE_PATH", profile_path),
+            patch.object(cb.settings, "PULSE_HISTORY_FILE", pulse_path),
+        ):
             h2 = cb.get_user_profile_hash()
 
         assert h1 != h2
@@ -104,9 +119,7 @@ class TestGetProfileContext:
 
     def test_formats_profile_from_session_state(self, tmp_path):
         stages_path = tmp_path / "stages.json"
-        stages_path.write_text(json.dumps({
-            "stages": {"peri": {"description": "Perimenopause"}}
-        }))
+        stages_path.write_text(json.dumps({"stages": {"peri": {"description": "Perimenopause"}}}))
 
         _st_mock.session_state = {
             "user_profile": {
@@ -174,9 +187,7 @@ class TestPulsePatternAnalysis:
             assert cb.get_pulse_pattern_analysis(days=30) == {}
 
     def test_sleep_disruption_trend(self):
-        entries = [
-            _pulse_entry(rest="3 AM Awakening", days_ago=i) for i in range(10)
-        ]
+        entries = [_pulse_entry(rest="3 AM Awakening", days_ago=i) for i in range(10)]
         with patch.object(cb, "load_pulse_history", return_value=entries):
             analysis = cb.get_pulse_pattern_analysis(days=30)
             assert "Persistent sleep disruption pattern" in analysis["trends"]
@@ -211,8 +222,10 @@ class TestBuildUserContext:
         assert result == ""
 
     def test_combines_sections(self):
-        with patch.object(cb, "get_profile_context", return_value="PROFILE_BLOCK"), \
-             patch.object(cb, "get_recent_pulse_context", return_value="PULSE_BLOCK"):
+        with (
+            patch.object(cb, "get_profile_context", return_value="PROFILE_BLOCK"),
+            patch.object(cb, "get_recent_pulse_context", return_value="PULSE_BLOCK"),
+        ):
             result = cb.build_user_context(
                 include_profile=True,
                 include_recent_pulse=True,
@@ -236,7 +249,9 @@ class TestMultiAgentLoadProfile:
 
     def test_loads_existing(self, tmp_path):
         pf = tmp_path / "profile.json"
-        pf.write_text(json.dumps({"stage_title": "Perimenopause", "neuro_symptoms": ["3am_wakeup"]}))
+        pf.write_text(
+            json.dumps({"stage_title": "Perimenopause", "neuro_symptoms": ["3am_wakeup"]})
+        )
         with patch.object(cb_multi, "USER_PROFILE_FILE", pf):
             profile = cb_multi.load_user_profile()
             assert profile["stage_title"] == "Perimenopause"
@@ -263,10 +278,14 @@ class TestMultiAgentLoadNotes:
 
     def test_valid_notes(self, tmp_path):
         nf = tmp_path / "notes.json"
-        nf.write_text(json.dumps([
-            {"content": "Feeling tired", "timestamp": "2026-02-10T10:00:00"},
-            {"content": "Better today", "timestamp": "2026-02-12T10:00:00"},
-        ]))
+        nf.write_text(
+            json.dumps(
+                [
+                    {"content": "Feeling tired", "timestamp": "2026-02-10T10:00:00"},
+                    {"content": "Better today", "timestamp": "2026-02-12T10:00:00"},
+                ]
+            )
+        )
         with patch.object(cb_multi, "NOTES_FILE", nf):
             text, count = cb_multi.load_notes()
             assert count == 2
@@ -274,10 +293,14 @@ class TestMultiAgentLoadNotes:
 
     def test_date_filter(self, tmp_path):
         nf = tmp_path / "notes.json"
-        nf.write_text(json.dumps([
-            {"content": "old note", "timestamp": "2025-01-01T10:00:00"},
-            {"content": "recent note", "timestamp": "2026-02-15T10:00:00"},
-        ]))
+        nf.write_text(
+            json.dumps(
+                [
+                    {"content": "old note", "timestamp": "2025-01-01T10:00:00"},
+                    {"content": "recent note", "timestamp": "2026-02-15T10:00:00"},
+                ]
+            )
+        )
         start = datetime(2026, 2, 1)
         with patch.object(cb_multi, "NOTES_FILE", nf):
             text, count = cb_multi.load_notes(start_date=start)

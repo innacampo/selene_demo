@@ -25,6 +25,7 @@ NOTES_FILE = settings.USER_DATA_DIR / "notes.json"
 @dataclass
 class ContextMetadata:
     """Metadata about the aggregated context."""
+
     pulse_entry_count: int
     notes_count: int
     chat_message_count: int
@@ -38,17 +39,13 @@ class ContextMetadata:
 def load_user_profile() -> dict:
     """
     Load user profile with validation.
-    
+
     Returns:
         Dict containing profile data or empty dict with defaults
     """
     if not USER_PROFILE_FILE.exists():
         logger.warning("Profile file not found, using defaults")
-        return {
-            "stage_title": "Unknown",
-            "neuro_symptoms": [],
-            "profile_complete": False
-        }
+        return {"stage_title": "Unknown", "neuro_symptoms": [], "profile_complete": False}
 
     try:
         with open(USER_PROFILE_FILE, encoding="utf-8") as f:
@@ -70,15 +67,16 @@ def load_user_profile() -> dict:
         return {"stage_title": "Unknown", "neuro_symptoms": [], "profile_complete": False}
 
 
-def load_notes(start_date: datetime | None = None,
-               end_date: datetime | None = None) -> tuple[str, int]:
+def load_notes(
+    start_date: datetime | None = None, end_date: datetime | None = None
+) -> tuple[str, int]:
     """
     Load and aggregate notes within date range.
-    
+
     Args:
         start_date: Filter start (None = no filter)
         end_date: Filter end (None = no filter)
-        
+
     Returns:
         Tuple[str, int]: (concatenated_notes, count)
     """
@@ -130,8 +128,9 @@ def load_notes(start_date: datetime | None = None,
         return "Error loading notes.", 0
 
 
-def load_chat_context(start_date: datetime | None = None,
-                      end_date: datetime | None = None) -> tuple[str, int]:
+def load_chat_context(
+    start_date: datetime | None = None, end_date: datetime | None = None
+) -> tuple[str, int]:
     """
     Load user chat messages (not assistant responses) within date range.
 
@@ -191,7 +190,7 @@ def load_chat_context(start_date: datetime | None = None,
 def calculate_completeness_score(context: dict) -> float:
     """
     Calculate data completeness score (0-1).
-    
+
     Factors:
     - Profile exists (0.2)
     - Has pulse data (0.4)
@@ -217,18 +216,16 @@ def calculate_completeness_score(context: dict) -> float:
 
 @st.cache_data(ttl=300, show_spinner=False)
 def build_complete_context(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
-    default_days: int = 30
+    start_date: datetime | None = None, end_date: datetime | None = None, default_days: int = 30
 ) -> dict:
     """
     Build unified context from all data sources.
-    
+
     Args:
         start_date: Analysis start date (None = default_days ago)
         end_date: Analysis end date (None = now)
         default_days: Default lookback if dates not specified
-        
+
     Returns:
         Dict with keys:
             - profile: User profile dict
@@ -263,7 +260,7 @@ def build_complete_context(
         date_range_end=end_date.isoformat(),
         context_generated_at=datetime.now().isoformat(),
         has_profile=profile.get("profile_complete", False),
-        data_completeness_score=0.0  # Will calculate below
+        data_completeness_score=0.0,  # Will calculate below
     )
 
     # Assemble context
@@ -272,15 +269,17 @@ def build_complete_context(
         "pulse_entries": pulse_entries,
         "all_notes": all_notes,
         "chat_context": chat_context,
-        "metadata": asdict(metadata)
+        "metadata": asdict(metadata),
     }
 
     # Calculate and update completeness
     context["metadata"]["data_completeness_score"] = calculate_completeness_score(context)
 
-    logger.info(f"Context built: {metadata.pulse_entry_count} pulse entries, "
-                f"{metadata.notes_count} notes, {metadata.chat_message_count} messages, "
-                f"completeness: {context['metadata']['data_completeness_score']}")
+    logger.info(
+        f"Context built: {metadata.pulse_entry_count} pulse entries, "
+        f"{metadata.notes_count} notes, {metadata.chat_message_count} messages, "
+        f"completeness: {context['metadata']['data_completeness_score']}"
+    )
 
     return context
 
@@ -288,10 +287,10 @@ def build_complete_context(
 def get_context_summary(context: dict) -> str:
     """
     Generate human-readable summary of context.
-    
+
     Args:
         context: Context dict from build_complete_context()
-        
+
     Returns:
         Formatted summary string
     """
@@ -304,12 +303,12 @@ def get_context_summary(context: dict) -> str:
 Context Summary
 ===============
 Date Range: {date_start} to {date_end}
-Profile: {'Complete' if meta['has_profile'] else 'Incomplete'}
-Pulse Entries: {meta['pulse_entry_count']}
-Notes: {meta['notes_count']}
-Chat Messages: {meta['chat_message_count']}
-Data Completeness: {meta['data_completeness_score'] * 100:.0f}%
-Generated: {datetime.fromisoformat(meta['context_generated_at']).strftime('%Y-%m-%d %H:%M:%S')}
+Profile: {"Complete" if meta["has_profile"] else "Incomplete"}
+Pulse Entries: {meta["pulse_entry_count"]}
+Notes: {meta["notes_count"]}
+Chat Messages: {meta["chat_message_count"]}
+Data Completeness: {meta["data_completeness_score"] * 100:.0f}%
+Generated: {datetime.fromisoformat(meta["context_generated_at"]).strftime("%Y-%m-%d %H:%M:%S")}
 """
 
     return summary.strip()

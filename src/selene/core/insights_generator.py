@@ -32,12 +32,13 @@ from selene.core.deterministic_analysis import (
 # HTTP session with retries
 _http_session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)
-_http_session.mount('http://', adapter)
+_http_session.mount("http://", adapter)
 
 
 @dataclass
 class ReportMetrics:
     """Quality metrics for generated report."""
+
     word_count: int
     section_count: int
     has_all_sections: bool
@@ -48,7 +49,7 @@ class ReportMetrics:
 def validate_context(context: dict) -> tuple[bool, str]:
     """
     Validate context before report generation.
-    
+
     Returns:
         (is_valid, error_message)
     """
@@ -57,20 +58,26 @@ def validate_context(context: dict) -> tuple[bool, str]:
         return False, "No pulse data available for this period"
 
     if len(context["pulse_entries"]) < 3:
-        return False, f"Insufficient data: only {len(context['pulse_entries'])} entries (minimum 3 required)"
+        return (
+            False,
+            f"Insufficient data: only {len(context['pulse_entries'])} entries (minimum 3 required)",
+        )
 
     # Check completeness
     completeness = context["metadata"].get("data_completeness_score", 0)
     if completeness < 0.4:
-        return False, f"Data completeness too low: {completeness*100:.0f}% (minimum 40% required)"
+        return False, f"Data completeness too low: {completeness * 100:.0f}% (minimum 40% required)"
 
-    logger.debug(f"Context validation passed: {len(context['pulse_entries'])} entries, "
-                 f"{completeness*100:.0f}% complete")
+    logger.debug(
+        f"Context validation passed: {len(context['pulse_entries'])} entries, "
+        f"{completeness * 100:.0f}% complete"
+    )
     return True, ""
 
 
-def calculate_report_metrics(report_text: str, generation_time: float,
-                             context: dict) -> ReportMetrics:
+def calculate_report_metrics(
+    report_text: str, generation_time: float, context: dict
+) -> ReportMetrics:
     """Calculate quality metrics for the generated report."""
     word_count = len(report_text.split())
 
@@ -79,7 +86,7 @@ def calculate_report_metrics(report_text: str, generation_time: float,
         "### How You've Been",
         "### What Your Body Is Telling You",
         "### Patterns & Connections",
-        "### For Your Provider"
+        "### For Your Provider",
     ]
 
     section_count = sum(1 for section in required_sections if section in report_text)
@@ -90,17 +97,17 @@ def calculate_report_metrics(report_text: str, generation_time: float,
         section_count=section_count,
         has_all_sections=has_all_sections,
         generation_time_seconds=round(generation_time, 2),
-        context_completeness=context["metadata"].get("data_completeness_score", 0)
+        context_completeness=context["metadata"].get("data_completeness_score", 0),
     )
 
 
 def clean_report_text(report_text: str) -> str:
     """
     Remove common LLM preambles and postambles from report text.
-    
+
     Args:
         report_text: Raw LLM output
-        
+
     Returns:
         Cleaned report text starting with first markdown header
     """
@@ -119,25 +126,29 @@ def clean_report_text(report_text: str) -> str:
         "---",
     ]
 
-    lines = report_text.split('\n')
+    lines = report_text.split("\n")
     start_idx = 0
 
     # Find the first line that contains a markdown header (###)
     for idx, line in enumerate(lines):
         stripped = line.strip()
-        if stripped.startswith('###'):
+        if stripped.startswith("###"):
             start_idx = idx
             break
         # Also check if any preamble pattern is in this line
         if any(pattern.lower() in stripped.lower() for pattern in preamble_patterns):
             continue
         # If we hit substantial content before a header, start there
-        elif stripped and len(stripped) > 20 and not any(p in stripped for p in ['*', '-', 'ready', 'provide']):
+        elif (
+            stripped
+            and len(stripped) > 20
+            and not any(p in stripped for p in ["*", "-", "ready", "provide"])
+        ):
             start_idx = idx
             break
 
     # Rejoin from the start index
-    cleaned = '\n'.join(lines[start_idx:])
+    cleaned = "\n".join(lines[start_idx:])
 
     # Remove common postambles
     postamble_patterns = [
@@ -148,7 +159,7 @@ def clean_report_text(report_text: str) -> str:
         "Remember, I'm here",
     ]
 
-    lines = cleaned.split('\n')
+    lines = cleaned.split("\n")
     end_idx = len(lines)
 
     # Scan backwards for postambles
@@ -156,14 +167,14 @@ def clean_report_text(report_text: str) -> str:
         stripped = lines[idx].strip()
         if any(pattern.lower() in stripped.lower() for pattern in postamble_patterns):
             end_idx = idx
-        elif stripped and '###' in stripped:
+        elif stripped and "###" in stripped:
             # Stop at last valid section
             break
 
-    cleaned = '\n'.join(lines[:end_idx])
+    cleaned = "\n".join(lines[:end_idx])
 
     # Clean up extra whitespace
-    cleaned = '\n'.join(line for line in cleaned.split('\n') if line.strip() or '')
+    cleaned = "\n".join(line for line in cleaned.split("\n") if line.strip() or "")
 
     return cleaned.strip()
 
@@ -171,7 +182,7 @@ def clean_report_text(report_text: str) -> str:
 def validate_report_quality(report_text: str, context: dict) -> tuple[bool, list[str]]:
     """
     Check for common quality issues in generated report.
-    
+
     Returns:
         (is_valid, list_of_issues)
     """
@@ -179,18 +190,37 @@ def validate_report_quality(report_text: str, context: dict) -> tuple[bool, list
 
     # Check for vague language
     vague_phrases = [
-        "some positive shifts", "areas needing attention", "quite",
-        "somewhat", "a bit", "rather", "fairly", "pretty much"
+        "some positive shifts",
+        "areas needing attention",
+        "quite",
+        "somewhat",
+        "a bit",
+        "rather",
+        "fairly",
+        "pretty much",
     ]
     for phrase in vague_phrases:
         if phrase.lower() in report_text.lower():
             issues.append(f"Contains vague phrase: '{phrase}'")
 
     # Check for specific date references if notes exist
-    has_dates = any(month in report_text for month in [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ])
+    has_dates = any(
+        month in report_text
+        for month in [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ]
+    )
 
     if context["metadata"]["notes_count"] > 0 and not has_dates:
         issues.append("No specific dates referenced from user notes")
@@ -204,7 +234,7 @@ def validate_report_quality(report_text: str, context: dict) -> tuple[bool, list
         "### How You've Been",
         "### What Your Body Is Telling You",
         "### Patterns & Connections",
-        "### For Your Provider"
+        "### For Your Provider",
     ]
     missing_sections = [s for s in required_sections if s not in report_text]
     if missing_sections:
@@ -244,11 +274,11 @@ def generate_insights_report(
     start_date: datetime | None = None,
     end_date: datetime | None = None,
     retry_on_failure: bool = True,
-    max_retries: int = 2
+    max_retries: int = 2,
 ) -> tuple[bool, str, dict | None]:
     """
     Generate a personal insights report with enhanced error handling.
-    
+
     Returns:
         Tuple[bool, str, Optional[Dict]]: (success, report_or_error, metadata)
     """
@@ -268,18 +298,20 @@ def generate_insights_report(
             logger.error(f"Context validation failed: {error_msg}")
             return False, error_msg, None
 
-        logger.info(f"Context ready: {len(context['pulse_entries'])} entries, "
-                   f"{context['metadata']['notes_count']} notes, "
-                   f"{context['metadata']['chat_message_count']} messages")
+        logger.info(
+            f"Context ready: {len(context['pulse_entries'])} entries, "
+            f"{context['metadata']['notes_count']} notes, "
+            f"{context['metadata']['chat_message_count']} messages"
+        )
 
         # === 2. Deterministic analysis ===
         logger.info("Running deterministic analysis")
         analyzer = DeterministicAnalyzer()
 
         # Symptom statistics
-        rest_stats = analyzer.analyze_symptom_statistics(context['pulse_entries'], "rest")
-        climate_stats = analyzer.analyze_symptom_statistics(context['pulse_entries'], "climate")
-        clarity_stats = analyzer.analyze_symptom_statistics(context['pulse_entries'], "clarity")
+        rest_stats = analyzer.analyze_symptom_statistics(context["pulse_entries"], "rest")
+        climate_stats = analyzer.analyze_symptom_statistics(context["pulse_entries"], "climate")
+        clarity_stats = analyzer.analyze_symptom_statistics(context["pulse_entries"], "clarity")
 
         stats_block = ""
         if rest_stats:
@@ -290,19 +322,21 @@ def generate_insights_report(
             stats_block += format_statistics_summary(clarity_stats, "Mental Clarity") + "\n\n"
 
         # Pattern detection
-        patterns = analyzer.detect_patterns(context['pulse_entries'])
+        patterns = analyzer.detect_patterns(context["pulse_entries"])
         patterns_block = format_pattern_summary(patterns)
 
         # Risk assessment
-        risk = analyzer.assess_risk_level(context['pulse_entries'])
+        risk = analyzer.assess_risk_level(context["pulse_entries"])
         risk_block = (
             f"Risk Level: {risk['level'].upper()} (score {risk['score']}/10)\n"
             f"Flags: {', '.join(risk['flags']) if risk['flags'] else 'None'}\n"
             f"{risk.get('rationale', '')}"
         )
 
-        logger.info(f"Analysis complete: Risk={risk['level']}, "
-                   f"Patterns={len(patterns.__dict__ if hasattr(patterns, '__dict__') else {})}")
+        logger.info(
+            f"Analysis complete: Risk={risk['level']}, "
+            f"Patterns={len(patterns.__dict__ if hasattr(patterns, '__dict__') else {})}"
+        )
 
         # === 3. Compose LLM prompt ===
         profile = context.get("profile", {})
@@ -421,7 +455,7 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
             try:
                 if attempt > 0:
                     logger.info(f"Retry attempt {attempt}/{max_retries}")
-                    time.sleep(2 ** attempt)  # Exponential backoff
+                    time.sleep(2**attempt)  # Exponential backoff
 
                 response = _http_session.post(
                     f"{ollama_base_url}/api/generate",
@@ -467,9 +501,11 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
 
         # Calculate metrics
         metrics = calculate_report_metrics(report_text, generation_time, context)
-        logger.info(f"Report metrics: {metrics.word_count} words, "
-                   f"{metrics.section_count}/4 sections, "
-                   f"completeness: {metrics.context_completeness*100:.0f}%")
+        logger.info(
+            f"Report metrics: {metrics.word_count} words, "
+            f"{metrics.section_count}/4 sections, "
+            f"completeness: {metrics.context_completeness * 100:.0f}%"
+        )
 
         # Validate report quality
         is_quality, quality_issues = validate_report_quality(report_text, context)
@@ -488,7 +524,7 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
             # Convert patterns to JSON-serializable format
             patterns_dict = None
             if patterns:
-                if hasattr(patterns, '__dict__'):
+                if hasattr(patterns, "__dict__"):
                     patterns_dict = asdict(patterns)
                 elif isinstance(patterns, dict):
                     patterns_dict = patterns
@@ -533,8 +569,9 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
         return False, f"Error generating report: {str(e)}", None
 
 
-def format_report_for_pdf(report_text: str, user_profile: dict,
-                          metrics: dict | None = None) -> dict:
+def format_report_for_pdf(
+    report_text: str, user_profile: dict, metrics: dict | None = None
+) -> dict:
     """Structure report for PDF generation with metrics."""
     result = {
         "title": "SELENE Insights Report",
@@ -569,7 +606,7 @@ if __name__ == "__main__":
         ollama_base_url=args.url,
         model=args.model,
         save_full_report=True,
-        retry_on_failure=not args.no_retry
+        retry_on_failure=not args.no_retry,
     )
 
     if success:

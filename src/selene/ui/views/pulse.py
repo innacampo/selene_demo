@@ -44,9 +44,7 @@ def render_pulse():
 
     # PILLAR 3: CLARITY
     with st.container(border=True):
-        st.markdown(
-            '<div class="selene-sub-header">Clarity</div>', unsafe_allow_html=True
-        )
+        st.markdown('<div class="selene-sub-header">Clarity</div>', unsafe_allow_html=True)
         clarity_level = st.segmented_control(
             "Mental State",
             ["Brain Fog", "Neutral", "Focused"],

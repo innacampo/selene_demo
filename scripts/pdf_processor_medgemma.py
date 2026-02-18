@@ -56,7 +56,9 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 
             if page_text:
                 full_text.append("\n\n".join(page_text))
-                logger.debug(f"extract_text_from_pdf: extracted page {page_index+1} blocks={len(page_text)}")
+                logger.debug(
+                    f"extract_text_from_pdf: extracted page {page_index + 1} blocks={len(page_text)}"
+                )
 
         doc.close()
 
@@ -82,26 +84,32 @@ def clean_pdf_text(text: str) -> str:
 
     # 1. Remove Bibliography/References (The biggest source of noise)
     # This splits at the first occurrence of "References" or "Bibliography"
-    text = re.split(r'\n\s*(?:References|Bibliography|LITERATURE CITED|WORKS CITED)\s*\n', text, flags=re.IGNORECASE)[0]
+    text = re.split(
+        r"\n\s*(?:References|Bibliography|LITERATURE CITED|WORKS CITED)\s*\n",
+        text,
+        flags=re.IGNORECASE,
+    )[0]
 
     # 2. Remove typical PDF headers/footers (e.g., "Page 1 of 20" or journal names)
     # Matches patterns like "Page 123", "Journal of Clinical...", "doi: 10.100..."
-    text = re.sub(r'(?i)Page\s+\d+(\s+of\s+\d+)?', '', text)
-    text = re.sub(r'(?i)doi:\s*10\.\d{4,9}/[-._;()/:A-Z0-9]+', '', text)
-    text = re.sub(r'(?i)Copyright\s+©.*?\d{4}.*?\.', '', text)
+    text = re.sub(r"(?i)Page\s+\d+(\s+of\s+\d+)?", "", text)
+    text = re.sub(r"(?i)doi:\s*10\.\d{4,9}/[-._;()/:A-Z0-9]+", "", text)
+    text = re.sub(r"(?i)Copyright\s+©.*?\d{4}.*?\.", "", text)
 
     # 3. Clean Inline Citations (Stops MedGemma from getting stuck on names/years)
     # Matches (Author, 2023), [12, 14-16], (Smith et al., 2019)
-    text = re.sub(r'\[\d+(?:,\s*\d+|-?\d+)*\]', '', text) # Matches [12] or [1-5]
-    text = re.sub(r'\(\s*[A-Z][a-z]+(?:\set\sal\.)?,\s*\d{4}\s*\)', '', text) # Matches (Smith, 2020)
+    text = re.sub(r"\[\d+(?:,\s*\d+|-?\d+)*\]", "", text)  # Matches [12] or [1-5]
+    text = re.sub(
+        r"\(\s*[A-Z][a-z]+(?:\set\sal\.)?,\s*\d{4}\s*\)", "", text
+    )  # Matches (Smith, 2020)
 
     # 4. Remove Table and Figure Captions
     # Often captions aren't useful without the image and just clutter the RAG
-    text = re.sub(r'(?i)(?:Figure|Fig|Table)\s+\d+.*?\n', '', text)
+    text = re.sub(r"(?i)(?:Figure|Fig|Table)\s+\d+.*?\n", "", text)
 
     # 5. Final Formatting: Strip excessive whitespace
-    text = re.sub(r'\s+', ' ', text) # Collapse multiple spaces/newlines
-    text = re.sub(r'\n\s*\n', '\n', text) # Remove empty lines
+    text = re.sub(r"\s+", " ", text)  # Collapse multiple spaces/newlines
+    text = re.sub(r"\n\s*\n", "\n", text)  # Remove empty lines
 
     return text.strip()
 
@@ -113,16 +121,16 @@ def chunk_text_medgemma(
 ) -> list[dict[str, str]]:
     """
     Split text into semantic chunks while tracking and injecting clinical sections.
-    
-    This function uses a sliding window approach with lookahead to detect section 
-    headers. It attempts to break chunks at paragraphs or sentence boundaries 
+
+    This function uses a sliding window approach with lookahead to detect section
+    headers. It attempts to break chunks at paragraphs or sentence boundaries
     within a safe margin to avoid cutting off information mid-sentence.
-    
+
     Args:
         text: The full cleaned text from the PDF.
         chunk_size: Target characters per chunk.
         overlap: Character overlap between consecutive chunks.
-        
+
     Returns:
         List[Dict[str, str]]: Chunks with "content" (labeled) and "section" metadata.
     """
@@ -130,7 +138,7 @@ def chunk_text_medgemma(
     # \s* handles indentation, ^... ensures we catch lines starting with these keywords
     header_pattern = re.compile(
         r"^\s*(?:\d+\.?\s+)?(ABSTRACT|INTRODUCTION|METHODS|RESULTS|DISCUSSION|CONCLUSION|SAFETY|DOSAGE|ADVERSE EFFECTS|LIMITATIONS|TREATMENT|PARTICIPANTS)",
-        re.IGNORECASE | re.MULTILINE
+        re.IGNORECASE | re.MULTILINE,
     )
 
     chunks = []
@@ -143,7 +151,7 @@ def chunk_text_medgemma(
 
         # 1. Look ahead for section changes to update current_section
         # Looking slightly ahead (300 chars) helps detect if a new section starts right after this chunk
-        search_window = text[start:min(end + 300, len(text))]
+        search_window = text[start : min(end + 300, len(text))]
         headers = list(header_pattern.finditer(search_window))
         if headers:
             current_section = headers[0].group(1).title()
@@ -168,10 +176,7 @@ def chunk_text_medgemma(
             # This is extremely effective for 4b parameter models with limited attention.
             labeled_content = f"[{current_section.upper()}] {chunk_content}"
 
-            chunks.append({
-                "content": labeled_content,
-                "section": current_section
-            })
+            chunks.append({"content": labeled_content, "section": current_section})
 
         # Base case: we reached the end of the text
         if end >= len(text):
@@ -180,8 +185,11 @@ def chunk_text_medgemma(
         # Advance the window with overlap
         start = end - overlap
 
-    logger.debug(f"chunk_text_medgemma: generated {len(chunks)} chunks (chunk_size={chunk_size}, overlap={overlap})")
+    logger.debug(
+        f"chunk_text_medgemma: generated {len(chunks)} chunks (chunk_size={chunk_size}, overlap={overlap})"
+    )
     return chunks
+
 
 def create_source_name(filename: str) -> str:
     """
@@ -214,7 +222,9 @@ def process_pdf(pdf_path: str, chunk_size: int = 1500, overlap: int = 300) -> di
     pdf_path = Path(pdf_path)
 
     try:
-        logger.debug(f"process_pdf: ENTER pdf_path={pdf_path}, chunk_size={chunk_size}, overlap={overlap}")
+        logger.debug(
+            f"process_pdf: ENTER pdf_path={pdf_path}, chunk_size={chunk_size}, overlap={overlap}"
+        )
         # Extract text
         full_text = extract_text_from_pdf(str(pdf_path))
 
@@ -229,7 +239,9 @@ def process_pdf(pdf_path: str, chunk_size: int = 1500, overlap: int = 300) -> di
         total_pages = len(doc)
         doc.close()
 
-        logger.info(f"process_pdf: processed {pdf_path.name} pages={total_pages} chunks={len(chunks)} total_chars={len(full_text)}")
+        logger.info(
+            f"process_pdf: processed {pdf_path.name} pages={total_pages} chunks={len(chunks)} total_chars={len(full_text)}"
+        )
         return {
             "source": source,
             "chunks": chunks,
@@ -285,7 +297,9 @@ def process_pdfs_to_json(
         return None
 
     if verbose:
-        logger.info(f"process_pdfs_to_json: Processing {len(pdf_files)} PDF files (chunk_size={chunk_size} overlap={overlap})")
+        logger.info(
+            f"process_pdfs_to_json: Processing {len(pdf_files)} PDF files (chunk_size={chunk_size} overlap={overlap})"
+        )
         print(f"\n{'=' * 70}")
         print(f"Processing {len(pdf_files)} PDF files for MedGemma")
         print(f"Chunk size: {chunk_size} chars (~{chunk_size // 4} tokens)")
@@ -304,19 +318,21 @@ def process_pdfs_to_json(
         result = process_pdf(str(pdf_path), chunk_size, overlap)
 
         if not result:
-            logger.warning(f"process_pdfs_to_json: Skipping {pdf_path.name} due to processing error")
+            logger.warning(
+                f"process_pdfs_to_json: Skipping {pdf_path.name} due to processing error"
+            )
             continue
 
         source = result["source"]
 
         if verbose:
-            logger.debug(f"process_pdfs_to_json: result pages={result['total_pages']} chunks={len(result['chunks'])} chars={result['total_chars']}")
+            logger.debug(
+                f"process_pdfs_to_json: result pages={result['total_pages']} chunks={len(result['chunks'])} chars={result['total_chars']}"
+            )
             print(f"  Source: {source}")
             print(f"  Pages: {result['total_pages']}")
             print(f"  Chunks: {len(result['chunks'])}")
-            print(
-                f"  Avg chunk: {result['total_chars'] // len(result['chunks'])} chars"
-            )
+            print(f"  Avg chunk: {result['total_chars'] // len(result['chunks'])} chars")
             print()
 
         # Create entries for each chunk
@@ -330,7 +346,7 @@ def process_pdfs_to_json(
 
             metadata = {
                 "source": source,
-                "section": section_label, # This is where the section lives!
+                "section": section_label,  # This is where the section lives!
                 "filename": result["filename"],
                 "chunk_index": i,
                 "total_chunks": len(result["chunks"]),
@@ -339,9 +355,8 @@ def process_pdfs_to_json(
             }
 
             all_ids.append(chunk_id)
-            all_documents.append(document_text) # Store only the text string
-            all_metadatas.append(metadata)     # Store the dictionary metadata
-
+            all_documents.append(document_text)  # Store only the text string
+            all_metadatas.append(metadata)  # Store the dictionary metadata
 
     # Create export
     export_data = {
@@ -362,7 +377,7 @@ def process_pdfs_to_json(
     # Save to file
     if verbose:
         logger.info(f"process_pdfs_to_json: Writing {len(all_ids)} chunks to {output_file}")
-        print(f"{ '=' * 70 }")
+        print(f"{'=' * 70}")
         print(f"Writing {len(all_ids)} chunks to {output_file}")
 
     with open(output_file, "w", encoding="utf-8") as f:
@@ -422,15 +437,17 @@ if __name__ == "__main__":
 
                 all_ids.append(chunk_id)
                 all_documents.append(doc_text)
-                all_metadatas.append({
-                    "source": result["source"],
-                    "section": section,
-                    "filename": result["filename"],
-                    "chunk_index": i,
-                    "total_chunks": len(result["chunks"]),
-                    "total_pages": result["total_pages"],
-                    "chunk_size_chars": len(doc_text),
-                })
+                all_metadatas.append(
+                    {
+                        "source": result["source"],
+                        "section": section,
+                        "filename": result["filename"],
+                        "chunk_index": i,
+                        "total_chunks": len(result["chunks"]),
+                        "total_pages": result["total_pages"],
+                        "chunk_size_chars": len(doc_text),
+                    }
+                )
 
             export_data = {
                 "export_metadata": {

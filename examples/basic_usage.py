@@ -72,7 +72,7 @@ def main():
             risk = analyzer.assess_risk_level(pulse_data)
             print("   ✓ Risk assessment complete")
             print(f"   Risk level: {risk.get('risk_level', 'Unknown')}")
-            if risk.get('risk_flags'):
+            if risk.get("risk_flags"):
                 print(f"   Flags: {', '.join(risk['risk_flags'])}")
         else:
             print("   ℹ No pulse data available for risk assessment")

@@ -13,12 +13,10 @@ SYMPTOM_SEVERITY_MAP = {
     "Restorative": 0,
     "Fragmented": 5,
     "3 AM Awakening": 9,
-
     "Cool": 0,
     "Warm": 4,
     "Flashing": 7,
     "Heavy": 10,
-
     "Focused": 0,
     "Neutral": 4,
     "Brain Fog": 9,

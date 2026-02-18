@@ -50,7 +50,9 @@ def get_user_profile_hash() -> str:
                 profile = json.load(f)
                 hash_parts.append(str(profile.get("last_updated", "")))
                 hash_parts.append(str(profile.get("stage", "")))
-                logger.debug(f"get_user_profile_hash: profile last_updated={profile.get('last_updated', '')}, stage={profile.get('stage', '')}")
+                logger.debug(
+                    f"get_user_profile_hash: profile last_updated={profile.get('last_updated', '')}, stage={profile.get('stage', '')}"
+                )
         except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"get_user_profile_hash: Failed to read profile: {e}")
 
@@ -174,7 +176,9 @@ def get_recent_pulse_context(days: int = 7) -> str:
         if e.get("clarity") == "Brain Fog":
             brain_fog += 1
 
-    logger.debug(f"get_recent_pulse_context: sleep_issues={sleep_issues}, hot_flashes={hot_flashes}, brain_fog={brain_fog}")
+    logger.debug(
+        f"get_recent_pulse_context: sleep_issues={sleep_issues}, hot_flashes={hot_flashes}, brain_fog={brain_fog}"
+    )
 
     lines = [
         f"=== RECENT SYMPTOMS (Last {days} Days, {len(recent)} Entries) ===",
@@ -301,29 +305,17 @@ def format_pulse_analysis_for_llm(analysis: dict) -> str:
     ]
 
     for state, count in analysis.get("sleep_pattern", {}).items():
-        pct = (
-            (count / analysis["total_entries"] * 100)
-            if analysis["total_entries"] > 0
-            else 0
-        )
+        pct = (count / analysis["total_entries"] * 100) if analysis["total_entries"] > 0 else 0
         lines.append(f"  {state}: {count} days ({pct:.0f}%)")
 
     lines.append("\nHot Flash Pattern:")
     for state, count in analysis.get("climate_pattern", {}).items():
-        pct = (
-            (count / analysis["total_entries"] * 100)
-            if analysis["total_entries"] > 0
-            else 0
-        )
+        pct = (count / analysis["total_entries"] * 100) if analysis["total_entries"] > 0 else 0
         lines.append(f"  {state}: {count} days ({pct:.0f}%)")
 
     lines.append("\nMental Clarity Pattern:")
     for state, count in analysis.get("clarity_pattern", {}).items():
-        pct = (
-            (count / analysis["total_entries"] * 100)
-            if analysis["total_entries"] > 0
-            else 0
-        )
+        pct = (count / analysis["total_entries"] * 100) if analysis["total_entries"] > 0 else 0
         lines.append(f"  {state}: {count} days ({pct:.0f}%)")
 
     if analysis.get("trends"):
@@ -361,7 +353,9 @@ def build_user_context(
     Returns:
         str: A formatted multi-section block ready for injection into the LLM prompt.
     """
-    logger.debug(f"build_user_context: ENTER include_profile={include_profile}, include_recent_pulse={include_recent_pulse}, include_pulse_analysis={include_pulse_analysis}, recent_pulse_days={recent_pulse_days}, analysis_days={analysis_days}")
+    logger.debug(
+        f"build_user_context: ENTER include_profile={include_profile}, include_recent_pulse={include_recent_pulse}, include_pulse_analysis={include_pulse_analysis}, recent_pulse_days={recent_pulse_days}, analysis_days={analysis_days}"
+    )
     start_time = time.time()
     sections = []
 

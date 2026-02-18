@@ -1,7 +1,7 @@
 """
 Internal Navigation Router.
 
-Utility helpers for page flow, back-button rendering, and 
+Utility helpers for page flow, back-button rendering, and
 header orchestration.
 """
 

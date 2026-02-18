@@ -1,9 +1,9 @@
 """
 SELENE Main Application Entry Point.
 
-This script initializes the Streamlit application, configures the environment, 
-and handles top-level routing between the home dashboard, chat interface, 
-pulse tracking, and clinical reports. It also manages the initial 
+This script initializes the Streamlit application, configures the environment,
+and handles top-level routing between the home dashboard, chat interface,
+pulse tracking, and clinical reports. It also manages the initial
 user onboarding workflow.
 """
 
@@ -44,7 +44,9 @@ def _setup_logging():
         file_handler.setFormatter(formatter)
 
         root_logger.addHandler(file_handler)
-        root_logger.info(f"File logging enabled: {log_path} (maxBytes={settings.LOG_MAX_BYTES}, backups={settings.LOG_BACKUP_COUNT})")
+        root_logger.info(
+            f"File logging enabled: {log_path} (maxBytes={settings.LOG_MAX_BYTES}, backups={settings.LOG_BACKUP_COUNT})"
+        )
 
     # Reduce noisiness from watchdog internals
     try:
@@ -86,12 +88,12 @@ PAGE_ROUTES = {
 def main() -> None:
     """
     Primary application loop.
-    
+
     Coordinates:
     - Onboarding check: redirects to onboarding if profile is incomplete.
     - Page routing: renders the active view based on session state.
     - Fallback logic: ensures users are returned to 'home' if state is corrupted.
-    
+
     init_page_config, init_session_state, and load_css are called here
     (not at module level) because Streamlit re-executes the entry script
     on every interaction but only imports this module once. Placing them

@@ -22,9 +22,11 @@ PULSE_HISTORY_FILE = settings.PULSE_HISTORY_FILE
 BACKUP_DIR = USER_DATA_DIR / "backups"
 MAX_BACKUPS = 10
 
+
 @dataclass
 class PulseEntry:
     """Validated pulse entry structure."""
+
     rest: str | None = None
     climate: str | None = None
     clarity: str | None = None
@@ -133,7 +135,7 @@ def restore_from_backup() -> list[dict]:
 def save_pulse_entry(entry_data: dict) -> tuple[bool, str]:
     """
     Save pulse entry with atomic writes and validation.
-    
+
     Returns:
         (success: bool, error_message: str)
     """
@@ -162,11 +164,7 @@ def save_pulse_entry(entry_data: dict) -> tuple[bool, str]:
     tmp_path = None
     try:
         with tempfile.NamedTemporaryFile(
-            mode='w',
-            dir=USER_DATA_DIR,
-            delete=False,
-            suffix='.tmp',
-            encoding='utf-8'
+            mode="w", dir=USER_DATA_DIR, delete=False, suffix=".tmp", encoding="utf-8"
         ) as tmp:
             json.dump(history, tmp, indent=2, ensure_ascii=False)
             tmp_path = tmp.name
@@ -209,12 +207,14 @@ def invalidate_all_caches():
 
     try:
         from selene.core.med_logic import invalidate_user_context_cache
+
         invalidate_user_context_cache()
     except ImportError:
         pass
 
     try:
         from selene.core.context_builder import get_pulse_pattern_analysis, get_recent_pulse_context
+
         get_recent_pulse_context.clear()
         get_pulse_pattern_analysis.clear()
     except ImportError:
@@ -222,6 +222,7 @@ def invalidate_all_caches():
 
     try:
         from selene.core.context_builder_multi_agent import load_pulse_history as ma_load
+
         ma_load.clear()
     except ImportError:
         pass
@@ -246,7 +247,7 @@ def verify_data_integrity() -> tuple[bool, list[str]]:
         for i in range(len(history) - 1):
             try:
                 ts1 = datetime.fromisoformat(history[i]["timestamp"])
-                ts2 = datetime.fromisoformat(history[i+1]["timestamp"])
+                ts2 = datetime.fromisoformat(history[i + 1]["timestamp"])
                 if ts1 > ts2:
                     issues.append(f"Out of order at index {i}")
                     break
@@ -254,8 +255,7 @@ def verify_data_integrity() -> tuple[bool, list[str]]:
                 pass
 
         # Validate entries
-        invalid = sum(1 for e in history
-                     if not PulseEntry(**e).validate()[0])
+        invalid = sum(1 for e in history if not PulseEntry(**e).validate()[0])
         if invalid > 0:
             issues.append(f"{invalid} invalid entries")
 

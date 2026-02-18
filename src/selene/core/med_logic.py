@@ -43,6 +43,7 @@ _http_session = requests.Session()
 
 class Config:
     """Configuration — delegates to centralized settings.py."""
+
     DB_PATH = settings.DB_PATH
     COLLECTION_NAME = settings.MEDICAL_DOCS_COLLECTION
     EMBEDDING_MODEL = settings.EMBEDDING_MODEL
@@ -163,9 +164,7 @@ user_context_cache = TTLCache(max_size=10)  # Smaller cache for user contexts
 
 def generate_cache_key(*args, prefix: str = "") -> str:
     """Generate a deterministic cache key from arguments."""
-    logger.debug(
-        f"generate_cache_key called with prefix='{prefix}', args_count={len(args)}"
-    )
+    logger.debug(f"generate_cache_key called with prefix='{prefix}', args_count={len(args)}")
     # Convert args to a stable string representation
     key_parts = [str(arg) for arg in args]
     combined = "|".join(key_parts)
@@ -191,9 +190,7 @@ def get_user_context_hash() -> str:
     except (ImportError, AttributeError) as e:
         # Fallback: use timestamp rounded to cache TTL
         # This ensures cache invalidation every N seconds
-        logger.debug(
-            f"get_user_context_hash: Fallback mode (reason: {type(e).__name__})"
-        )
+        logger.debug(f"get_user_context_hash: Fallback mode (reason: {type(e).__name__})")
         timestamp = int(time.time() / Config.USER_CONTEXT_CACHE_TTL)
         logger.debug(f"get_user_context_hash: Using timestamp bucket: {timestamp}")
         return str(timestamp)
@@ -295,9 +292,7 @@ def get_chroma_collection():
         )
         logger.debug(f"  Collection retrieved in {time.time() - col_start:.3f}s")
         logger.debug(f"  Collection contains {collection.count()} documents")
-        logger.info(
-            f"get_chroma_collection: SUCCESS (total: {time.time() - start:.3f}s)"
-        )
+        logger.info(f"get_chroma_collection: SUCCESS (total: {time.time() - start:.3f}s)")
         return collection, None
     except Exception as e:
         logger.error(f"get_chroma_collection: FAILED - {type(e).__name__}: {e}")
@@ -316,9 +311,7 @@ def contextualize_query(query: str, history: list[dict]) -> str:
     """
     logger.debug("=" * 40)
     logger.debug("contextualize_query: ENTER")
-    logger.debug(
-        f"  Query: '{query[:100]}...'" if len(query) > 100 else f"  Query: '{query}'"
-    )
+    logger.debug(f"  Query: '{query[:100]}...'" if len(query) > 100 else f"  Query: '{query}'")
     logger.debug(f"  History length: {len(history)} messages")
 
     if not history:
@@ -338,9 +331,7 @@ def contextualize_query(query: str, history: list[dict]) -> str:
     logger.debug("  CACHE MISS: calling LLM for contextualization...")
 
     # Cache miss - perform contextualization
-    history_txt = "\n".join(
-        [f"{m['role'].title()}: {m['content']}" for m in history[-2:]]
-    )
+    history_txt = "\n".join([f"{m['role'].title()}: {m['content']}" for m in history[-2:]])
     prompt = (
         f"Conversation:\n{history_txt}\n\nUser's follow-up: {query}\n\n"
         f"Task: Rewrite the follow-up as a standalone question. Output ONLY the rewritten text."
@@ -361,9 +352,7 @@ def contextualize_query(query: str, history: list[dict]) -> str:
             f"{Config.OLLAMA_BASE_URL}/api/generate", json=payload, timeout=5
         )
         duration = time.time() - start_time
-        logger.debug(
-            f"  Response status: {response.status_code}, duration: {duration:.3f}s"
-        )
+        logger.debug(f"  Response status: {response.status_code}, duration: {duration:.3f}s")
 
         rewritten = response.json().get("response", "").strip()
         logger.debug(
@@ -377,9 +366,7 @@ def contextualize_query(query: str, history: list[dict]) -> str:
             logger.debug("  Using original query (rewritten too short)")
 
         # Cache the result
-        contextualized_query_cache.set(
-            cache_key, result, Config.CONTEXTUALIZED_QUERY_CACHE_TTL
-        )
+        contextualized_query_cache.set(cache_key, result, Config.CONTEXTUALIZED_QUERY_CACHE_TTL)
         logger.info(
             f"contextualize_query: {duration:.3f}s (cached for {Config.CONTEXTUALIZED_QUERY_CACHE_TTL}s)"
         )
@@ -391,18 +378,14 @@ def contextualize_query(query: str, history: list[dict]) -> str:
         return query
 
 
-def query_knowledge_base(
-    query: str, top_k: int | None = None
-) -> tuple[str, list[str], list[dict]]:
+def query_knowledge_base(query: str, top_k: int | None = None) -> tuple[str, list[str], list[dict]]:
     """
     Query ChromaDB for relevant documents with Section-Aware formatting.
     CACHED: Identical queries are cached for 10 minutes.
     """
     logger.debug("=" * 40)
     logger.debug("query_knowledge_base: ENTER")
-    logger.debug(
-        f"  Query: '{query[:80]}...'" if len(query) > 80 else f"  Query: '{query}'"
-    )
+    logger.debug(f"  Query: '{query[:80]}...'" if len(query) > 80 else f"  Query: '{query}'")
 
     top_k = top_k or Config.RAG_TOP_K
     logger.debug(f"  top_k: {top_k}")
@@ -504,9 +487,7 @@ def get_user_context_cached() -> str:
     # Check cache first
     cached_context = user_context_cache.get(cache_key)
     if cached_context is not None:
-        logger.debug(
-            f"  CACHE HIT: returning cached context ({len(cached_context)} chars)"
-        )
+        logger.debug(f"  CACHE HIT: returning cached context ({len(cached_context)} chars)")
         return cached_context
 
     logger.debug("  CACHE MISS: building user context...")
@@ -552,14 +533,10 @@ def _prepare_medgemma_request(
     """
     logger.debug("=" * 60)
     logger.debug("_prepare_medgemma_request: ENTER")
-    logger.debug(
-        f"  Prompt: '{prompt[:80]}...'" if len(prompt) > 80 else f"  Prompt: '{prompt}'"
-    )
+    logger.debug(f"  Prompt: '{prompt[:80]}...'" if len(prompt) > 80 else f"  Prompt: '{prompt}'")
     logger.debug(f"  Context length: {len(context)} chars")
     logger.debug(f"  Chat context length: {len(chat_context)} chars")
-    logger.debug(
-        f"  Recent history: {len(recent_history) if recent_history else 0} messages"
-    )
+    logger.debug(f"  Recent history: {len(recent_history) if recent_history else 0} messages")
     logger.debug(f"  Stream mode: {stream}")
     logger.debug(f"  Model: {Config.LLM_MODEL}")
 
@@ -654,9 +631,7 @@ def _prepare_medgemma_request(
     rag_len = len(context) if context else 0
     past_len = len(chat_context) if chat_context else 0
     recent_len = (
-        sum(len(f"{m['role']}: {m['content']}") for m in recent_history)
-        if recent_history
-        else 0
+        sum(len(f"{m['role']}: {m['content']}") for m in recent_history) if recent_history else 0
     )
 
     logger.info("Prompt Breakdown (chars):")
@@ -688,9 +663,7 @@ def call_medgemma(
     Call MedGemma and return the complete response as a string.
     Uses cached user context to avoid rebuilding on every call.
     """
-    payload = _prepare_medgemma_request(
-        prompt, context, chat_context, recent_history, stream=False
-    )
+    payload = _prepare_medgemma_request(prompt, context, chat_context, recent_history, stream=False)
     try:
         start_time = time.time()
         logger.debug(
@@ -703,9 +676,7 @@ def call_medgemma(
         )
         duration = time.time() - start_time
         result = response.json().get("response", "")
-        logger.info(
-            f"call_medgemma: received {len(result)} chars in {duration:.3f}s"
-        )
+        logger.info(f"call_medgemma: received {len(result)} chars in {duration:.3f}s")
         logger.debug(
             f"  Response preview: '{result[:100]}...'"
             if len(result) > 100
@@ -718,9 +689,7 @@ def call_medgemma(
         return f"Error: Request timed out after {Config.OLLAMA_TIMEOUT}s"
     except Exception as e:
         duration = time.time() - start_time
-        logger.error(
-            f"call_medgemma: FAILED after {duration:.3f}s - {type(e).__name__}: {e}"
-        )
+        logger.error(f"call_medgemma: FAILED after {duration:.3f}s - {type(e).__name__}: {e}")
         return f"Error: {str(e)}"
 
 
@@ -734,9 +703,7 @@ def call_medgemma_stream(
     Call MedGemma with streaming. Yields response chunks as they arrive.
     Uses cached user context to avoid rebuilding on every call.
     """
-    payload = _prepare_medgemma_request(
-        prompt, context, chat_context, recent_history, stream=True
-    )
+    payload = _prepare_medgemma_request(prompt, context, chat_context, recent_history, stream=True)
     try:
         start_time = time.time()
         logger.debug("  Streaming mode enabled")

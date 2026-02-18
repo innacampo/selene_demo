@@ -1,7 +1,7 @@
 """
 Home Dashboard View.
 
-The landing interface for SELENE. It dynamically adapts its messaging 
+The landing interface for SELENE. It dynamically adapts its messaging
 and layout based on the user's identified menopause stage and profile.
 """
 

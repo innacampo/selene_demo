@@ -14,12 +14,16 @@ from unittest.mock import MagicMock, patch
 _st_mock = MagicMock()
 sys.modules.setdefault("streamlit", _st_mock)
 
+
 def _passthrough_decorator(*args, **kwargs):
     if args and callable(args[0]):
         return args[0]
+
     def wrapper(fn):
         return fn
+
     return wrapper
+
 
 _st_mock.cache_data = _passthrough_decorator
 _st_mock.cache_resource = _passthrough_decorator
@@ -216,9 +220,7 @@ class TestGenerateCacheKey:
 
 class TestGetUserContextHash:
     def test_uses_profile_hash(self):
-        with patch(
-            "selene.core.context_builder.get_user_profile_hash", return_value="abc123"
-        ):
+        with patch("selene.core.context_builder.get_user_profile_hash", return_value="abc123"):
             result = get_user_context_hash()
             assert result == "abc123"
 

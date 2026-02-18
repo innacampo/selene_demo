@@ -1,8 +1,8 @@
 """
 Clinical Summary & AI Insights View.
 
-Generates and displays specialized medical insights using the multi-agent 
-reasoning pipeline. Handles report streaming, historical analysis 
+Generates and displays specialized medical insights using the multi-agent
+reasoning pipeline. Handles report streaming, historical analysis
 filtering, and high-fidelity PDF export.
 """
 
@@ -96,9 +96,7 @@ def generate_insights_pdf(report_data: dict) -> bytes:
 
     # Convert the markdown report body to HTML
     md_extensions = ["extra", "sane_lists", "smarty", "nl2br"]
-    report_html = markdown.markdown(
-        report_data["report_content"], extensions=md_extensions
-    )
+    report_html = markdown.markdown(report_data["report_content"], extensions=md_extensions)
 
     # Build the full HTML document
     html = f"""<!DOCTYPE html>
@@ -130,6 +128,7 @@ def generate_insights_pdf(report_data: dict) -> bytes:
     logger.info("generate_insights_pdf: SUCCESS bytes=%d", len(pdf_bytes))
     return pdf_bytes
 
+
 def _split_report_sections(report_text: str) -> list[tuple[str, str]]:
     """Split a markdown report into (header, body) pairs on ### boundaries."""
     parts = re.split(r"^###\s+", report_text, flags=re.MULTILINE)
@@ -150,9 +149,7 @@ def render_clinical():
     logger.debug("render_clinical: ENTER")
     render_header_with_back("back_clinical")
 
-    st.markdown(
-        '<div class="page-title">Clinical AI Summary</div>', unsafe_allow_html=True
-    )
+    st.markdown('<div class="page-title">Clinical AI Summary</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
     # Date Range Selector
@@ -176,10 +173,7 @@ def render_clinical():
         current_range = (date_range[0], date_range[1])
 
         # Generate report if not exists or date range changed
-        if (
-            "clinical_report" not in st.session_state
-            or last_range != current_range
-        ):
+        if "clinical_report" not in st.session_state or last_range != current_range:
             logger.debug(
                 "render_clinical: generating report cached=%s range_changed=%s",
                 "clinical_report" in st.session_state,
@@ -187,8 +181,7 @@ def render_clinical():
             )
             with st.spinner("Generating insights report..."):
                 success, result, metrics = generate_insights_report(
-                    start_date=start_date_dt,
-                    end_date=end_date_dt
+                    start_date=start_date_dt, end_date=end_date_dt
                 )
 
                 if success:
@@ -233,7 +226,6 @@ def render_clinical():
             sections = _split_report_sections(report_text)
             logger.debug("render_clinical: rendering sections=%d", len(sections))
 
-
             for header, body in sections:
                 with st.container(border=True):
                     st.markdown(f"### {header}")
@@ -249,11 +241,7 @@ def render_clinical():
 
                 # Pass metrics to PDF formatter if available
                 metrics_for_pdf = st.session_state.get("clinical_metrics")
-                report_data = format_report_for_pdf(
-                    report_text,
-                    user_profile,
-                    metrics_for_pdf
-                )
+                report_data = format_report_for_pdf(report_text, user_profile, metrics_for_pdf)
 
                 # Update date range in title for the PDF
                 report_data["title"] = f"Clinical Summary ({date_range[0]} to {date_range[1]})"

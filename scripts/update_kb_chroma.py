@@ -42,7 +42,9 @@ def import_to_local_db(
     Returns:
         chomadb.Collection: The updated collection object.
     """
-    logger.debug(f"import_to_local_db: ENTER json_file={json_file}, db_path={db_path}, collection={collection_name}, batch_size={batch_size}")
+    logger.debug(
+        f"import_to_local_db: ENTER json_file={json_file}, db_path={db_path}, collection={collection_name}, batch_size={batch_size}"
+    )
     json_path = Path(json_file)
     if not json_path.exists():
         logger.error(f"import_to_local_db: JSON file not found: {json_file}")
@@ -66,9 +68,7 @@ def import_to_local_db(
     # This is non-destructive to the collection ID, preventing Stale Reference errors
     existing_count = collection.count()
     if existing_count > 0:
-        logger.info(
-            f"Clearing {existing_count} existing documents from '{collection_name}'..."
-        )
+        logger.info(f"Clearing {existing_count} existing documents from '{collection_name}'...")
         # Get all IDs and delete them in batches if necessary
         # For simplicity, we get all IDs. If the DB is massive (>100k), this might need chunking.
         results = collection.get()
@@ -76,9 +76,7 @@ def import_to_local_db(
             collection.delete(ids=results["ids"])
             logger.info("Collection cleared.")
 
-    logger.info(
-        f"Collection '{collection_name}' has {collection.count()} existing documents"
-    )
+    logger.info(f"Collection '{collection_name}' has {collection.count()} existing documents")
 
     # Load JSON
     logger.info(f"Loading {json_file}")
@@ -87,9 +85,7 @@ def import_to_local_db(
 
     # Validate format
     if not isinstance(data, dict) or "ids" not in data or "documents" not in data:
-        raise ValueError(
-            "Invalid JSON format. Expected: {ids: [], documents: [], metadatas: []}"
-        )
+        raise ValueError("Invalid JSON format. Expected: {ids: [], documents: [], metadatas: []}")
 
     ids = data["ids"]
     documents = data["documents"]
@@ -120,7 +116,9 @@ def import_to_local_db(
         batch_docs = documents[i : i + batch_size]
         batch_meta = metadatas[i : i + batch_size]
 
-        logger.debug(f"import_to_local_db: Preparing batch {i//batch_size + 1} ({len(batch_ids)} docs)")
+        logger.debug(
+            f"import_to_local_db: Preparing batch {i // batch_size + 1} ({len(batch_ids)} docs)"
+        )
 
         # Clean metadata (ChromaDB only accepts str, int, float, bool)
         clean_metas = []
@@ -143,7 +141,9 @@ def import_to_local_db(
             logger.info(f"Progress: {imported}/{total} ({100 * imported / total:.1f}%)")
 
         except Exception:
-            logger.exception("import_to_local_db: Batch failed - exception adding batch to collection")
+            logger.exception(
+                "import_to_local_db: Batch failed - exception adding batch to collection"
+            )
             errors += len(batch_ids)
 
     logger.debug(f"import_to_local_db: Import loop complete - imported={imported}, errors={errors}")
@@ -198,9 +198,7 @@ def query_with_sources(
         settings=ChromaSettings(anonymized_telemetry=settings.CHROMA_TELEMETRY),
     )
     embedding_model = settings.get_embedding_function()
-    collection = client.get_collection(
-        name=collection_name, embedding_function=embedding_model
-    )
+    collection = client.get_collection(name=collection_name, embedding_function=embedding_model)
 
     logger.debug(f"query_with_sources: ENTER query='{query[:80]}...', n_results={n_results}")
     results = collection.query(query_texts=[query], n_results=n_results)
@@ -226,9 +224,7 @@ def query_with_sources(
     return documents, sources, metadatas, distances
 
 
-def format_response_with_citations(
-    query: str, llm_response: str, sources: list[str]
-) -> str:
+def format_response_with_citations(query: str, llm_response: str, sources: list[str]) -> str:
     """
     Format LLM response with citations appended.
 
@@ -240,7 +236,9 @@ def format_response_with_citations(
     Returns:
         Formatted response with citations
     """
-    logger.debug(f"format_response_with_citations: ENTER query='{query[:80]}...', llm_response_len={len(llm_response)}, sources_count={len(sources)}")
+    logger.debug(
+        f"format_response_with_citations: ENTER query='{query[:80]}...', llm_response_len={len(llm_response)}, sources_count={len(sources)}"
+    )
     formatted = f"{llm_response}\n\n"
 
     if sources:
@@ -270,7 +268,9 @@ def query_test(
     documents, sources, metadatas, distances = query_with_sources(
         query, db_path, collection_name, n_results
     )
-    logger.debug(f"query_test: Retrieved {len(documents)} documents and {len(sources)} unique sources")
+    logger.debug(
+        f"query_test: Retrieved {len(documents)} documents and {len(sources)} unique sources"
+    )
 
     print("RETRIEVED CONTEXT:")
     print("-" * 60)
@@ -304,9 +304,7 @@ def get_collection_stats(
     embedding_model = settings.get_embedding_function()
 
     try:
-        collection = client.get_collection(
-            name=collection_name, embedding_function=embedding_model
-        )
+        collection = client.get_collection(name=collection_name, embedding_function=embedding_model)
     except ValueError:
         print(f"Collection '{collection_name}' not found")
         return
@@ -350,9 +348,7 @@ if __name__ == "__main__":
     parser.add_argument("--collection", default=settings.MEDICAL_DOCS_COLLECTION)
     parser.add_argument("--batch-size", type=int, default=500)
     parser.add_argument("--test-query", help="Run test query after import")
-    parser.add_argument(
-        "--stats", action="store_true", help="Show collection statistics"
-    )
+    parser.add_argument("--stats", action="store_true", help="Show collection statistics")
     parser.add_argument("--query", help="Query the database without import")
 
     args = parser.parse_args()

@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class ChatDBConfig:
     """Configuration — delegates to centralized settings.py."""
+
     DB_PATH = settings.DB_PATH
     COLLECTION_NAME = settings.CHAT_HISTORY_COLLECTION
     EMBEDDING_MODEL = settings.EMBEDDING_MODEL
@@ -225,7 +226,9 @@ def save_message(
         "rag_sources": ", ".join(rag_sources) if rag_sources else "",
     }
 
-    logger.debug(f"save_message: doc_id={doc_id}, role={role}, idx={message_index}, rag_count={len(rag_sources) if rag_sources else 0}")
+    logger.debug(
+        f"save_message: doc_id={doc_id}, role={role}, idx={message_index}, rag_count={len(rag_sources) if rag_sources else 0}"
+    )
     try:
         collection.add(
             ids=[doc_id],
@@ -336,17 +339,13 @@ def list_past_sessions(limit: int = None) -> list[dict]:
             messages.sort(key=lambda m: m["meta"].get("message_index", 0))
 
             # Find the first user message for the preview
-            first_user_msg = next(
-                (m for m in messages if m["meta"]["role"] == "user"), None
-            )
+            first_user_msg = next((m for m in messages if m["meta"]["role"] == "user"), None)
 
             summaries.append(
                 {
                     "session_id": sid,
                     "first_message": (
-                        first_user_msg["doc"][:120]
-                        if first_user_msg
-                        else "(no user message)"
+                        first_user_msg["doc"][:120] if first_user_msg else "(no user message)"
                     ),
                     "started_at": messages[0]["meta"].get("timestamp", ""),
                     "message_count": len(messages),
@@ -446,9 +445,7 @@ def delete_session(session_id: str) -> bool:
         results = collection.get(where={"session_id": session_id})
         if results["ids"]:
             collection.delete(ids=results["ids"])
-            logger.info(
-                f"Deleted session {session_id} ({len(results['ids'])} messages)"
-            )
+            logger.info(f"Deleted session {session_id} ({len(results['ids'])} messages)")
         else:
             logger.debug(f"delete_session: no ids found for {session_id}")
         return True

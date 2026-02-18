@@ -28,9 +28,7 @@ def analyzer():
     return DeterministicAnalyzer()
 
 
-def _make_entries(
-    rest_vals, climate_vals=None, clarity_vals=None, days_back=None, notes=None
-):
+def _make_entries(rest_vals, climate_vals=None, clarity_vals=None, days_back=None, notes=None):
     """Build a list of pulse entry dicts.
 
     If *days_back* is None, timestamps start today and go backwards one day
