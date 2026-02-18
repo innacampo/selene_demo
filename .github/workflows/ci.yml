@@ -31,7 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-        - name: Install system dependencies
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev pkg-config python3-dev
           python -m pip install --upgrade pip
