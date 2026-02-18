@@ -1,6 +1,6 @@
 # SELENE
 
-[![CI](https://github.com/innacampo/selene_shell_to_brain/actions/workflows/ci.yml/badge.svg)](https://github.com/innacampo/selene_shell_to_brain/actions/workflows/ci.yml)
+[![CI](https://github.com/innacampo/selene/actions/workflows/ci.yml/badge.svg)](https://github.com/innacampo/selene/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B.svg)](https://streamlit.io)
@@ -38,8 +38,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/innacampo/selene_shell_to_brain.git
-cd selene_shell_to_brain/selene
+git clone https://github.com/innacampo/selene.git
+cd selene/selene
 
 # 2. Create venv and install
 python3 -m venv med_env

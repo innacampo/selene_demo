@@ -56,9 +56,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/innacampo/selene_shell_to_brain"
-Repository = "https://github.com/innacampo/selene_shell_to_brain"
-Issues = "https://github.com/innacampo/selene_shell_to_brain/issues"
+Homepage = "https://github.com/innacampo/selene"
+Repository = "https://github.com/innacampo/selene"
+Issues = "https://github.com/innacampo/selene/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

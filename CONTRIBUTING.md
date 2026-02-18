@@ -25,8 +25,8 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 1. **Fork & Clone**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/selene_shell_to_brain.git
-   cd selene_shell_to_brain/selene
+   git clone https://github.com/YOUR_USERNAME/selene.git
+   cd selene/selene
    ```
 
 2. **Set Up Development Environment**
@@ -102,7 +102,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Questions?
 
-Open a [Discussion](https://github.com/innacampo/selene_shell_to_brain/discussions) for questions not suited for issues.
+Open a [Discussion](https://github.com/innacampo/selene/discussions) for questions not suited for issues.
 
 ---
 

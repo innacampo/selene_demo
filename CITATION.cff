@@ -6,8 +6,8 @@ abstract: "Privacy-first menopause assistant with local symptom tracking, RAG-ba
 authors:
   - family-names: "Contributors"
     given-names: "SELENE"
-repository-code: "https://github.com/innacampo/selene_shell_to_brain"
-url: "https://github.com/innacampo/selene_shell_to_brain"
+repository-code: "https://github.com/innacampo/selene"
+url: "https://github.com/innacampo/selene"
 keywords:
   - menopause
   - health

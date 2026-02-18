@@ -5,7 +5,6 @@ This document outlines the planned development direction for SELENE.
 ## Version 0.2.0 (Q1 2026)
 
 ### Features
-- [ ] **Multi-user support** - Separate data directories per user profile
 - [ ] **Export/import functionality** - Backup/restore complete user data
 - [ ] **Enhanced visualizations** - Trend graphs for symptoms over time
 - [ ] **Notification system** - Reminders for daily attune logging
@@ -22,11 +21,6 @@ This document outlines the planned development direction for SELENE.
 - [ ] **Medication tracking** - Log medications and correlate with symptoms
 - [ ] **Custom symptom definitions** - User-defined tracking metrics
 - [ ] **Journaling mode** - Free-form notes with tagging
-
-### Technical Improvements
-- [ ] **Plugin system** - Extensible architecture for custom modules
-- [ ] **API layer** - REST API for integration with other tools
-- [ ] **Docker support** - Containerized deployment option
 
 ## Version 1.0.0 (Q3 2026)
 
@@ -49,7 +43,6 @@ This document outlines the planned development direction for SELENE.
 - Differential privacy for anonymized data sharing
 
 ### Community & Ecosystem
-- Plugin marketplace for community extensions
 - Academic partnerships for menopause research
 - Open datasets (anonymized, opt-in) for researchers
 - Educational content integration
@@ -58,8 +51,8 @@ This document outlines the planned development direction for SELENE.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. To propose a roadmap item:
 
-1. Open a [Feature Request](https://github.com/innacampo/selene_shell_to_brain/issues/new?template=feature_request.md)
-2. Join the [Discussion](https://github.com/innacampo/selene_shell_to_brain/discussions)
+1. Open a [Feature Request](https://github.com/innacampo/selene/issues/new?template=feature_request.md)
+2. Join the [Discussion](https://github.com/innacampo/selene/discussions)
 3. Tag proposals with `roadmap` label
 
 ---

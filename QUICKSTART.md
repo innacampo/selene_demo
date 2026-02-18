@@ -12,8 +12,8 @@ Welcome to SELENE development! This guide gets you up and running in 5 minutes.
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/YOUR_USERNAME/selene_shell_to_brain.git
-cd selene_shell_to_brain/selene
+git clone https://github.com/YOUR_USERNAME/selene.git
+cd selene/selene
 
 # 2. Create virtual environment
 python3 -m venv med_env
@@ -125,7 +125,7 @@ selene/
 ### Adding a New Feature
 
 1. Check [ROADMAP.md](ROADMAP.md) to see if it's planned
-2. Open a [Feature Request](https://github.com/innacampo/selene_shell_to_brain/issues/new?template=feature_request.md)
+2. Open a [Feature Request](https://github.com/innacampo/selene/issues/new?template=feature_request.md)
 3. Wait for maintainer feedback/approval
 4. Implement with tests
 5. Update documentation
@@ -133,7 +133,7 @@ selene/
 
 ### Fixing a Bug
 
-1. Check [existing issues](https://github.com/innacampo/selene_shell_to_brain/issues)
+1. Check [existing issues](https://github.com/innacampo/selene/issues)
 2. Reproduce the bug locally
 3. Write a failing test that exposes the bug
 4. Fix the bug
@@ -153,21 +153,21 @@ selene/
 - **Keep PRs focused** - One feature/fix per PR
 - **Write descriptive commits** - Use [Conventional Commits](https://www.conventionalcommits.org/)
 - **Add tests** - All new code should have tests
-- **Ask questions** - Use [Discussions](https://github.com/innacampo/selene_shell_to_brain/discussions)
+- **Ask questions** - Use [Discussions](https://github.com/innacampo/selene/discussions)
 
 ## Getting Help
 
 - 📖 [Full Documentation](README.md)
 - 🏗️ [Architecture Guide](docs/technical_reference.md)
-- 💬 [Discussions](https://github.com/innacampo/selene_shell_to_brain/discussions)
-- 🐛 [Report Issues](https://github.com/innacampo/selene_shell_to_brain/issues)
+- 💬 [Discussions](https://github.com/innacampo/selene/discussions)
+- 🐛 [Report Issues](https://github.com/innacampo/selene/issues)
 
 ## Next Steps
 
 1. Explore the codebase - start with [app.py](app.py) and [src/selene/ui/app.py](src/selene/ui/app.py)
 2. Run the app and try all features
 3. Read [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines
-4. Pick a ["good first issue"](https://github.com/innacampo/selene_shell_to_brain/labels/good%20first%20issue)
+4. Pick a ["good first issue"](https://github.com/innacampo/selene/labels/good%20first%20issue)
 5. Join the community discussions
 
 Happy coding! 🚀

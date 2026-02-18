@@ -32,5 +32,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated backup system for pulse history
 - Knowledge base import/export utilities
 
-[Unreleased]: https://github.com/innacampo/selene_shell_to_brain/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/innacampo/selene_shell_to_brain/releases/tag/v0.1.0
+[Unreleased]: https://github.com/innacampo/selene/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/innacampo/selene/releases/tag/v0.1.0

@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
   - name: 💬 Discussions
-    url: https://github.com/innacampo/selene_shell_to_brain/discussions
+    url: https://github.com/innacampo/selene/discussions
     about: Ask questions and discuss ideas with the community
   - name: 📚 Documentation
-    url: https://github.com/innacampo/selene_shell_to_brain/blob/main/README.md
+    url: https://github.com/innacampo/selene/blob/main/README.md
     about: Read the full documentation and technical reference
   - name: 🔒 Security Issues
-    url: https://github.com/innacampo/selene_shell_to_brain/blob/main/SECURITY.md
+    url: https://github.com/innacampo/selene/blob/main/SECURITY.md
     about: Report security vulnerabilities responsibly
