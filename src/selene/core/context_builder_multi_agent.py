@@ -80,6 +80,7 @@ def load_notes(
     Returns:
         Tuple[str, int]: (concatenated_notes, count)
     """
+
     def _parse_iso(ts: str) -> datetime | None:
         if not ts:
             return None
