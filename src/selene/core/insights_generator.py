@@ -19,15 +19,14 @@ from pathlib import Path
 import requests
 
 from selene import settings
-
-logger = logging.getLogger(__name__)
-
 from selene.core.context_builder_multi_agent import build_complete_context, get_context_summary
 from selene.core.deterministic_analysis import (
     DeterministicAnalyzer,
     format_pattern_summary,
     format_statistics_summary,
 )
+
+logger = logging.getLogger(__name__)
 
 # HTTP session with retries
 _http_session = requests.Session()
@@ -341,7 +340,7 @@ def generate_insights_report(
         # === 3. Compose LLM prompt ===
         profile = context.get("profile", {})
         all_notes = sanitize_user_input(context.get("all_notes", "No notes."))
-        chat_context = sanitize_user_input(context.get("chat_context", "No chat messages."))
+        sanitize_user_input(context.get("chat_context", "No chat messages."))
 
         system_instruction = """You are SELENE, a clinical AI for menopause.
 ROLE: Clinical Analyst.
@@ -368,7 +367,7 @@ TREND LOGIC:
 ABSOLUTE RULES:
 1. Start immediately with '### How You've Been'.
 2. Use double newlines between sections.
-3. For Section 4, copy the Risk Level and Flags exactly as written in the input. 
+3. For Section 4, copy the Risk Level and Flags exactly as written in the input.
 4. Use bullet points for lists."""
 
         examples = """
@@ -403,7 +402,7 @@ ABSOLUTE RULES:
 ### STRUCTURE REQUIREMENTS
 
 ### How You've Been
-Summarize the period. Reference 2 quotes from <USER_NOTES>. 
+Summarize the period. Reference 2 quotes from <USER_NOTES>.
 Frame a drop in score (7.1 to 6.8) as an IMPROVEMENT.
 Frame a high score (9.0) as a SEVERE CONCERN, never as "stable" or "good".
 

@@ -251,7 +251,7 @@ def verify_data_integrity() -> tuple[bool, list[str]]:
                 if ts1 > ts2:
                     issues.append(f"Out of order at index {i}")
                     break
-            except:
+            except (KeyError, TypeError, ValueError):
                 pass
 
         # Validate entries

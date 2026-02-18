@@ -25,21 +25,21 @@ def load_css():
             --text-tertiary: #777777;
             --text-placeholder: #999999;
             --text-auth-header: #8DA4C2; /* User requested blue */
-            
+
             --primary-accent: #8DA4C2;
             --primary-accent-hover: #2b3e57;
-            
+
             --border-light: #EAEAEA;
             --white: #ffffff;
-            
+
             --bot-msg-bg: #E8F0F8;
             --bot-msg-border: #d0dff0;
             --user-msg-bg: #ffffff;
             --user-msg-border: #EAEAEA;
-            
+
             --github-bg: #24292e;
             --github-hover: #3a3f44;
-            
+
             --font-main: 'Montserrat', sans-serif;
         }
 
@@ -60,7 +60,7 @@ def load_css():
             display: flex !important;
             justify-content: center !important;
         }
-        
+
         .stButton > button {
             background-color: var(--primary-accent) !important;
             color: var(--white) !important;
@@ -312,7 +312,7 @@ def load_css():
         /* ============================================
            CHAT INPUT STYLING - NO INNER BORDER
            ============================================ */
-        
+
         /* Chat input - full width to match messages */
         [data-testid="stChatInput"] {
             max-width: 100% !important;
@@ -430,7 +430,7 @@ def load_css():
         /* ============================================
            PULSE VIEW SPECIFIC STYLES
            ============================================ */
-        
+
         /* Segmented Control Styling */
         [data-testid="stSegmentedControl"] {
             border: none !important;
@@ -448,7 +448,7 @@ def load_css():
         /* Individual segments */
         [data-testid="stSegmentedControl"] button {
             border: 1px solid var(--border-light) !important;
-            color: var(--text-tertiary) !important; 
+            color: var(--text-tertiary) !important;
             border-radius: 8px !important;
             font-family: var(--font-main) !important;
             font-weight: 500 !important;
@@ -459,7 +459,7 @@ def load_css():
         [data-testid="stSegmentedControl"] button:hover:not([data-selected="true"]) {
             background-color: #f8f9fa !important;
         }
-        
+
         </style>
 
         """,

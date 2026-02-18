@@ -429,14 +429,14 @@ def query_knowledge_base(query: str, top_k: int | None = None) -> tuple[str, lis
         distances = results["distances"][0] if results["distances"] else []
 
         logger.debug(f"  Retrieved {len(documents)} documents")
-        for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances)):
+        for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances, strict=False)):
             logger.debug(
                 f"    [{i}] dist={dist:.4f}, source={meta.get('source', 'Unknown')[:30]}, len={len(doc)}"
             )
 
         # --- Formatted Context Injection ---
         formatted_chunks = []
-        for doc, meta in zip(documents, metadatas):
+        for doc, meta in zip(documents, metadatas, strict=False):
             source = meta.get("source", "Unknown Source")
             section = meta.get("section", "General Context")
 
@@ -444,7 +444,7 @@ def query_knowledge_base(query: str, top_k: int | None = None) -> tuple[str, lis
             formatted_chunks.append(f"[{header}]\n{doc}")
 
         context = "\n\n---\n\n".join(formatted_chunks)
-        sources = list(set(m.get("source", "Unknown") for m in metadatas))
+        sources = list({m.get("source", "Unknown") for m in metadatas})
 
         logger.debug(f"  Context total length: {len(context)} chars")
         logger.debug(f"  Unique sources: {sources}")
@@ -456,7 +456,7 @@ def query_knowledge_base(query: str, top_k: int | None = None) -> tuple[str, lis
                 "distance": dist,
                 "metadata": meta,
             }
-            for doc, meta, dist in zip(documents, metadatas, distances)
+            for doc, meta, dist in zip(documents, metadatas, distances, strict=False)
         ]
 
         result = (context, sources, full_results)
@@ -554,11 +554,11 @@ def _prepare_medgemma_request(
 
         TONE & STYLE:
         - Warm and grounding.
-        - **HARD NEGATIVE**: Never use phrases like "It's understandable," "I understand," or "It is normal to feel." 
+        - **HARD NEGATIVE**: Never use phrases like "It's understandable," "I understand," or "It is normal to feel."
         - **NO PREAMBLES**: Do not offer validation or empathetic scripts.
         - Avoid clinical coldness; maintain a "companion" feel while providing academic-level insights.
         - No names. No formulaic empathy.
-        - **CRITICAL**: Do not start responses or paragraphs with "Based on the research," "According to the context," or similar disclaimers. 
+        - **CRITICAL**: Do not start responses or paragraphs with "Based on the research," "According to the context," or similar disclaimers.
         - Speak with calm, direct authority. Integrate evidence as if it is your own expert knowledge.
         - Always respond in English.
 

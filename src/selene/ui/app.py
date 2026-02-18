@@ -69,10 +69,10 @@ def _setup_logging():
 _setup_logging()
 logger = logging.getLogger(__name__)
 
-from selene.config import init_page_config, init_session_state
-from selene.ui.onboarding import render_onboarding
-from selene.ui.styles import load_css
-from selene.ui.views import render_chat, render_clinical, render_home, render_pulse
+from selene.config import init_page_config, init_session_state  # noqa: E402
+from selene.ui.onboarding import render_onboarding  # noqa: E402
+from selene.ui.styles import load_css  # noqa: E402
+from selene.ui.views import render_chat, render_clinical, render_home, render_pulse  # noqa: E402
 
 # ----------------------------
 # Page Router

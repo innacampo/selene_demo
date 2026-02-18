@@ -150,7 +150,7 @@ def query_chat_history(
                 "distance": dist,
                 "rag_sources": meta.get("rag_sources", ""),
             }
-            for doc, meta, dist in zip(documents, metadatas, distances)
+            for doc, meta, dist in zip(documents, metadatas, distances, strict=False)
         ]
 
     except Exception as e:
@@ -271,7 +271,7 @@ def load_current_session() -> list[dict]:
 
         # Pair up documents with their metadata, then sort by message_index
         messages = []
-        for doc, meta in zip(results["documents"], results["metadatas"]):
+        for doc, meta in zip(results["documents"], results["metadatas"], strict=False):
             messages.append(
                 {
                     "role": meta["role"],
@@ -325,7 +325,7 @@ def list_past_sessions(limit: int = None) -> list[dict]:
 
         # Group messages by session_id
         sessions: dict[str, list[dict]] = {}
-        for doc, meta in zip(all_results["documents"], all_results["metadatas"]):
+        for doc, meta in zip(all_results["documents"], all_results["metadatas"], strict=False):
             sid = meta["session_id"]
             if sid not in sessions:
                 sessions[sid] = []
@@ -383,7 +383,7 @@ def load_session_by_id(session_id: str) -> list[dict]:
             return []
 
         messages = []
-        for doc, meta in zip(results["documents"], results["metadatas"]):
+        for doc, meta in zip(results["documents"], results["metadatas"], strict=False):
             messages.append(
                 {
                     "role": meta["role"],

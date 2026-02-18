@@ -87,7 +87,7 @@ def _load_stages_metadata() -> dict:
         return {}
 
 
-from selene.constants import NEURO_SYMPTOM_DESCRIPTIONS as NEURO_SYMPTOMS
+from selene.constants import NEURO_SYMPTOM_DESCRIPTIONS as NEURO_SYMPTOMS  # noqa: E402
 
 # ============================================================================
 # Onboarding UI
@@ -110,14 +110,14 @@ def render_onboarding() -> None:
     st.markdown(
         """
         <div style="text-align: center; margin-bottom: 40px;">
-            <h2 style="color: #8DA4C2; font-size: 22px; font-weight: 400; 
+            <h2 style="color: #8DA4C2; font-size: 22px; font-weight: 400;
                        letter-spacing: 2px; margin-bottom: 15px;">
                 Finding Your Place on the Map
             </h2>
-            <p style="color: #555; font-size: 16px; line-height: 1.7; 
+            <p style="color: #555; font-size: 16px; line-height: 1.7;
                       max-width: 650px; margin: 0 auto; font-weight: 300;">
-                Menopause is not a single event; it is a multi-year neuroendocrine 
-                transition. To tailor your insights, we need to understand where your 
+                Menopause is not a single event; it is a multi-year neuroendocrine
+                transition. To tailor your insights, we need to understand where your
                 system currently sits on the physiological timeline.
             </p>
         </div>
@@ -145,7 +145,7 @@ def render_onboarding() -> None:
         stage = stages_metadata[stage_choice]
         st.markdown(
             f"""
-            <div style="background-color: #E8F0F8; border: 1px solid #d0dff0; 
+            <div style="background-color: #E8F0F8; border: 1px solid #d0dff0;
                         border-radius: 15px; padding: 20px; margin: 20px 0;">
                 <p style="color: #555; margin: 0 0 10px 0; font-size: 14px;">
                     <strong>Cycle Pattern:</strong> {stage.get("cycle_description", "N/A")}
@@ -164,7 +164,7 @@ def render_onboarding() -> None:
     st.markdown(
         """
         <div style="text-align: center; margin: 40px 0 20px 0;">
-            <h3 style="color: #8DA4C2; font-size: 16px; font-weight: 500; 
+            <h3 style="color: #8DA4C2; font-size: 16px; font-weight: 500;
                        letter-spacing: 1.5px;">
                 Optional: The "Neuro-Check"
             </h3>

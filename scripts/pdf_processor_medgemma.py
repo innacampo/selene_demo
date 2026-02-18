@@ -71,7 +71,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 
     except Exception as e:
         logger.exception("extract_text_from_pdf: failed to extract text from PDF")
-        raise Exception(f"Error extracting text from PDF: {e}")
+        raise Exception(f"Error extracting text from PDF: {e}") from e
 
 
 def clean_pdf_text(text: str) -> str:

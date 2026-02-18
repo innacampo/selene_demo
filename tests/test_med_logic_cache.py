@@ -29,7 +29,7 @@ _st_mock.cache_data = _passthrough_decorator
 _st_mock.cache_resource = _passthrough_decorator
 _st_mock.session_state = {}
 
-from selene.core.med_logic import (
+from selene.core.med_logic import (  # noqa: E402
     CacheEntry,
     TTLCache,
     clear_all_caches,

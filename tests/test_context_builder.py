@@ -36,8 +36,8 @@ _st_mock.cache_data = _passthrough_decorator
 _st_mock.cache_resource = _passthrough_decorator
 _st_mock.session_state = {}
 
-from selene.core import context_builder as cb
-from selene.core import context_builder_multi_agent as cb_multi
+from selene.core import context_builder as cb  # noqa: E402
+from selene.core import context_builder_multi_agent as cb_multi  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -272,7 +272,10 @@ class TestMultiAgentLoadProfile:
 
 class TestMultiAgentLoadNotes:
     def test_missing_file(self, tmp_path):
-        with patch.object(cb_multi, "NOTES_FILE", tmp_path / "nope.json"):
+        with (
+            patch.object(cb_multi, "NOTES_FILE", tmp_path / "nope.json"),
+            patch.object(cb_multi, "load_pulse_history", return_value=[]),
+        ):
             text, count = cb_multi.load_notes()
             assert count == 0
 
@@ -286,7 +289,10 @@ class TestMultiAgentLoadNotes:
                 ]
             )
         )
-        with patch.object(cb_multi, "NOTES_FILE", nf):
+        with (
+            patch.object(cb_multi, "NOTES_FILE", nf),
+            patch.object(cb_multi, "load_pulse_history", return_value=[]),
+        ):
             text, count = cb_multi.load_notes()
             assert count == 2
             assert "Feeling tired" in text
@@ -302,10 +308,56 @@ class TestMultiAgentLoadNotes:
             )
         )
         start = datetime(2026, 2, 1)
-        with patch.object(cb_multi, "NOTES_FILE", nf):
+        with (
+            patch.object(cb_multi, "NOTES_FILE", nf),
+            patch.object(cb_multi, "load_pulse_history", return_value=[]),
+        ):
             text, count = cb_multi.load_notes(start_date=start)
             assert count == 1
             assert "recent note" in text
+
+    def test_reads_notes_from_pulse_history_when_legacy_file_missing(self, tmp_path):
+        start = datetime(2026, 1, 1)
+        end = datetime(2026, 1, 31)
+        pulse_entries = [
+            {"timestamp": "2026-01-10T10:00:00", "notes": "pulse note 1"},
+            {"timestamp": "2026-01-11T10:00:00", "notes": ""},
+        ]
+
+        with (
+            patch.object(cb_multi, "NOTES_FILE", tmp_path / "missing_notes.json"),
+            patch.object(cb_multi, "get_filtered_pulse_history", return_value=pulse_entries),
+        ):
+            text, count = cb_multi.load_notes(start_date=start, end_date=end)
+            assert count == 1
+            assert "pulse note 1" in text
+
+    def test_deduplicates_same_note_across_sources(self, tmp_path):
+        nf = tmp_path / "notes.json"
+        nf.write_text(
+            json.dumps(
+                [
+                    {"content": "shared note", "timestamp": "2026-01-10T10:00:00"},
+                    {"content": "legacy only", "timestamp": "2026-01-12T10:00:00"},
+                ]
+            )
+        )
+        start = datetime(2026, 1, 1)
+        end = datetime(2026, 1, 31)
+        pulse_entries = [
+            {"timestamp": "2026-01-10T10:00:00", "notes": "shared note"},
+            {"timestamp": "2026-01-11T10:00:00", "notes": "pulse only"},
+        ]
+
+        with (
+            patch.object(cb_multi, "NOTES_FILE", nf),
+            patch.object(cb_multi, "get_filtered_pulse_history", return_value=pulse_entries),
+        ):
+            text, count = cb_multi.load_notes(start_date=start, end_date=end)
+            assert count == 3
+            assert "shared note" in text
+            assert "legacy only" in text
+            assert "pulse only" in text
 
 
 # ===================================================================

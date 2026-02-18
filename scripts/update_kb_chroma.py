@@ -274,7 +274,7 @@ def query_test(
 
     print("RETRIEVED CONTEXT:")
     print("-" * 60)
-    for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances)):
+    for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances, strict=False)):
         print(f"\n[{i + 1}] Relevance: {1 - dist:.3f}")
         print(f"Source: {meta.get('source', 'Unknown')}")
         if meta.get("chunk_index") is not None:

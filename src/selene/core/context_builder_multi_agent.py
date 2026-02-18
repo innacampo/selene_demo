@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import streamlit as st
 
 from selene import settings
-from selene.storage.data_manager import get_filtered_pulse_history
+from selene.storage.data_manager import get_filtered_pulse_history, load_pulse_history
 
 logger = logging.getLogger(__name__)
 
@@ -80,49 +80,82 @@ def load_notes(
     Returns:
         Tuple[str, int]: (concatenated_notes, count)
     """
-    if not NOTES_FILE.exists():
-        return "No notes available.", 0
+    def _parse_iso(ts: str) -> datetime | None:
+        if not ts:
+            return None
+        try:
+            return datetime.fromisoformat(ts)
+        except ValueError:
+            try:
+                return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            except ValueError:
+                return None
+
+    def _in_range(ts: str) -> bool:
+        parsed = _parse_iso(ts)
+        if parsed is None:
+            return not (start_date or end_date)
+        if start_date and parsed < start_date:
+            return False
+        if end_date and parsed > end_date:
+            return False
+        return True
+
+    collected: list[tuple[datetime, str, str]] = []
+    seen: set[tuple[str, str]] = set()
+
+    def _add_note(timestamp: str, note_text: str):
+        text = (note_text or "").strip()
+        if not text:
+            return
+        ts = (timestamp or "").strip()
+        if (start_date or end_date) and not _in_range(ts):
+            return
+        key = (ts, text)
+        if key in seen:
+            return
+        seen.add(key)
+        collected.append((_parse_iso(ts) or datetime.min, ts, text))
 
     try:
-        with open(NOTES_FILE, encoding="utf-8") as f:
-            notes_data = json.load(f)
+        # Source 1 (legacy): notes.json
+        if NOTES_FILE.exists():
+            try:
+                with open(NOTES_FILE, encoding="utf-8") as f:
+                    notes_data = json.load(f)
 
-        if not isinstance(notes_data, list):
-            return "No notes available.", 0
+                if isinstance(notes_data, list):
+                    for note in notes_data:
+                        if not isinstance(note, dict):
+                            continue
+                        _add_note(
+                            note.get("timestamp", ""), note.get("content", note.get("text", ""))
+                        )
+            except json.JSONDecodeError:
+                logger.error("Notes JSON decode error")
+            except Exception as e:
+                logger.error(f"Legacy notes load error: {e}")
 
-        filtered_notes = []
-
-        for note in notes_data:
-            if not isinstance(note, dict):
+        # Source 2 (primary): pulse history notes
+        pulse_entries = (
+            get_filtered_pulse_history(start_date, end_date)
+            if (start_date and end_date)
+            else load_pulse_history()
+        )
+        for entry in pulse_entries:
+            if not isinstance(entry, dict):
                 continue
+            _add_note(entry.get("timestamp", ""), entry.get("notes", ""))
 
-            # Date filtering if specified
-            if start_date or end_date:
-                try:
-                    note_date = datetime.fromisoformat(note.get("timestamp", ""))
-                    if start_date and note_date < start_date:
-                        continue
-                    if end_date and note_date > end_date:
-                        continue
-                except (KeyError, ValueError):
-                    continue
-
-            # Aggregate note content
-            note_text = note.get("content", note.get("text", ""))
-            if note_text:
-                timestamp = note.get("timestamp", "")
-                filtered_notes.append(f"[{timestamp}] {note_text}")
-
-        if not filtered_notes:
+        if not collected:
             return "No notes in this period.", 0
 
-        aggregated = "\n\n".join(filtered_notes)
-        logger.debug(f"Loaded {len(filtered_notes)} notes")
-        return aggregated, len(filtered_notes)
+        collected.sort(key=lambda item: item[0])
+        formatted_notes = [f"[{timestamp}] {text}" for _, timestamp, text in collected]
+        aggregated = "\n\n".join(formatted_notes)
+        logger.debug(f"Loaded {len(formatted_notes)} notes")
+        return aggregated, len(formatted_notes)
 
-    except json.JSONDecodeError:
-        logger.error("Notes JSON decode error")
-        return "Notes file corrupted.", 0
     except Exception as e:
         logger.error(f"Notes load error: {e}")
         return "Error loading notes.", 0
@@ -160,7 +193,7 @@ def load_chat_context(
             return "No chat history available.", 0
 
         user_messages = []
-        for doc, meta in zip(results["documents"], results["metadatas"]):
+        for doc, meta in zip(results["documents"], results["metadatas"], strict=False):
             if start_date or end_date:
                 try:
                     msg_date = datetime.fromisoformat(meta.get("timestamp", ""))
