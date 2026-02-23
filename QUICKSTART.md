@@ -12,7 +12,7 @@ Welcome to SELENE development! This guide gets you up and running in 5 minutes.
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/YOUR_USERNAME/selene.git
+git clone https://github.com/innacampo/selene.git
 cd selene/selene
 
 # 2. Create virtual environment
@@ -25,7 +25,7 @@ pip install -e ".[dev]"
 # 4. Set up pre-commit hooks
 pre-commit install
 
-# 6. Pull the MedGemma model (one-time, ~2GB download)
+# 5. Pull the MedGemma model (one-time)
 ollama pull MedAIBase/MedGemma1.5:4b
 
 # 6. Run tests to verify setup
@@ -157,10 +157,10 @@ selene/
 
 ## Getting Help
 
-- 📖 [Full Documentation](README.md)
-- 🏗️ [Architecture Guide](docs/technical_reference.md)
-- 💬 [Discussions](https://github.com/innacampo/selene/discussions)
-- 🐛 [Report Issues](https://github.com/innacampo/selene/issues)
+- [Full Documentation](README.md)
+- [Architecture Guide](docs/technical_reference.md)
+- [Discussions](https://github.com/innacampo/selene/discussions)
+- [Report Issues](https://github.com/innacampo/selene/issues)
 
 ## Next Steps
 

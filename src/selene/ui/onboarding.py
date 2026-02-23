@@ -158,7 +158,7 @@ def render_onboarding() -> None:
             unsafe_allow_html=True,
         )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    #st.markdown("<br>", unsafe_allow_html=True)
 
     # Neuro-check section
     st.markdown(
@@ -182,13 +182,13 @@ def render_onboarding() -> None:
         if st.checkbox(label, key=f"neuro_{key}"):
             neuro_selected.append(key)
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # Save button
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button(
-            "Save Local Baseline & Continue",
+            "Continue",
             key="save_profile",
             use_container_width=True,
         ):

@@ -84,7 +84,6 @@ See [DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md) for the full tree.
 ## Data & Storage (local)
 - Profile: `data/user_data/user_profile.json`
 - Pulse history: `data/user_data/pulse_history.json` (+ backups in `data/user_data/backups/`)
-- Notes (optional): `data/user_data/notes.json`
 - Chroma DB: `data/user_data/user_med_db` (medical_docs, chat_history)
 - Reports (optional): `data/reports/`
 - Logs (if enabled): `../logs/selene.log` (rotating)

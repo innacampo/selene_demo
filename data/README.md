@@ -19,7 +19,6 @@ data/
 └── user_data/          # User data storage (gitignored, PRIVATE)
     ├── user_profile.json
     ├── pulse_history.json
-    ├── notes.json
     ├── backups/
     └── user_med_db/    # ChromaDB storage
 ```

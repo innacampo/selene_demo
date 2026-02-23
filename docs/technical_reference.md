@@ -127,7 +127,6 @@
 - Persisted:
   - `user_profile.json` (settings.PROFILE_PATH)
   - `pulse_history.json` (settings.PULSE_HISTORY_FILE) with rolling backups in `user_data/backups/pulse_history_*.json`
-  - `notes.json` (optional free-text notes consumed by insights reports)
   - ChromaDB storage in `user_data/user_med_db` (`medical_docs`, `chat_history`)
   - Saved reports (optional) in `reports/`
   - Logs when enabled: `logs/selene.log` (toggle via `settings.LOG_TO_FILE`)
