@@ -158,7 +158,7 @@ def render_onboarding() -> None:
             unsafe_allow_html=True,
         )
 
-    #st.markdown("<br>", unsafe_allow_html=True)
+    # st.markdown("<br>", unsafe_allow_html=True)
 
     # Neuro-check section
     st.markdown(
