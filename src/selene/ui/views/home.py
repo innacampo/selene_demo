@@ -96,7 +96,7 @@ def render_home():
         """
         <div class="demo-notice">
             <p>
-                This is a working prototype demonstrating SELENE architecture.
+                This is a working prototype demonstrating SELENE capabilities.
                 <br>
             </p>
             <a href="https://github.com/innacampo/selene"
