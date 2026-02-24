@@ -59,8 +59,8 @@ def _get_model():
                 _processor = AutoProcessor.from_pretrained(model_id, token=token)
 
                 if torch.cuda.is_available():
-                    dtype = torch.float16  # T4 supports fp16 natively
-                    device_map = {"": 0}   # entire model on cuda:0
+                    dtype = torch.bfloat16  # bf16 avoids fp16 overflow in Gemma attention
+                    device_map = {"": 0}    # entire model on cuda:0
                 else:
                     dtype = torch.float32
                     device_map = {"": "cpu"}
