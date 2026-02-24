@@ -57,13 +57,22 @@ def _get_model():
                 model_id = settings.HF_MODEL_ID
                 logger.info("Loading model %s …", model_id)
                 _processor = AutoProcessor.from_pretrained(model_id, token=token)
+
+                if torch.cuda.is_available():
+                    dtype = torch.float16  # T4 supports fp16 natively
+                    device_map = {"": 0}   # entire model on cuda:0
+                else:
+                    dtype = torch.float32
+                    device_map = {"": "cpu"}
+
                 _model = AutoModelForImageTextToText.from_pretrained(
                     model_id,
                     token=token,
-                    torch_dtype=torch.bfloat16,
-                    device_map="auto",
+                    torch_dtype=dtype,
+                    device_map=device_map,
                 )
-                logger.info("Model loaded on %s", _model.device)
+                actual_device = next(_model.parameters()).device
+                logger.info("Model loaded on %s (dtype=%s)", actual_device, dtype)
     return _model, _processor
 
 
