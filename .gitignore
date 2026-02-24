@@ -60,6 +60,8 @@ Thumbs.db
 # ============================================================================
 data/user_data/
 !data/user_data/user_med_db/
+!data/user_data/pulse_history.json
+!data/user_data/user_profile.json
 data/reports/
 data/models/
 logs/

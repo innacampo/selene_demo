@@ -24,6 +24,8 @@ COPY app.py ./
 COPY .streamlit/ ./.streamlit/
 COPY data/metadata/ ./data/metadata/
 COPY data/user_data/user_med_db/ ./data/user_data/user_med_db/
+COPY data/user_data/pulse_history.json ./data/user_data/pulse_history.json
+COPY data/user_data/user_profile.json ./data/user_data/user_profile.json
 
 # Create writable directories for runtime data
 RUN mkdir -p data/user_data/backups data/reports data/output
