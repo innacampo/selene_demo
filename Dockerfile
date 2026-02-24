@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt \
 # Ensure selene package is always importable (belt-and-suspenders)
 ENV PYTHONPATH="/app/src"
 
+# Prevent libgomp warnings from invalid HF Spaces env
+ENV OMP_NUM_THREADS="1"
+
 # Copy application code and static assets
 COPY app.py ./
 COPY .streamlit/ ./.streamlit/
