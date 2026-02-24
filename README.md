@@ -2,8 +2,7 @@
 title: SELENE
 colorFrom: indigo
 colorTo: blue
-sdk: streamlit
-sdk_version: "1.45.1"
+sdk: docker
 app_file: app.py
 pinned: false
 license: cc-by-4.0
