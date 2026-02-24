@@ -3,126 +3,637 @@
     "rest": "3 AM Awakening",
     "climate": "Heavy",
     "clarity": "Brain Fog",
-    "notes": "New Year, same disaster. Woke up at 3:12 AM drenched. The migraine is sitting right behind my left eye again. I feel like I'm vibrating with anxiety about the new project at work. I can't keep living like this.",
+    "notes": "New Year, same disaster. Woke up at 3:12 AM drenched in sweat. The migraine is sitting right behind my left eye again—a pulsing, wretched thing. I feel like I'm vibrating with anxiety about the new project at work. I can't keep living like this; I feel like my body is glitching.",
     "timestamp": "2026-01-01T08:00:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Flashing",
     "clarity": "Brain Fog",
-    "notes": "Migraine lasted 14 hours. Finally eased up but left me feeling like a ghost. I'm forgetting simple client names. I've started putting Post-its everywhere just to remember my morning schedule.",
+    "notes": "The migraine lasted 14 hours yesterday. Finally eased up but left me feeling like a ghost. I'm forgetting simple client names—people I've known for years. I've started putting Post-its everywhere just to remember my morning schedule. It’s humiliating.",
     "timestamp": "2026-01-02T08:15:00.000000"
   },
   {
     "rest": "3 AM Awakening",
     "climate": "Heavy",
     "clarity": "Brain Fog",
-    "notes": "The internal heat is unbearable. It starts in my chest and just rushes up. I stood on the balcony in my robe at 4 AM just to feel the January air. My joints are so stiff I can't even make a fist this morning.",
+    "notes": "Stared at the ceiling from 3 AM until sunrise. My heart was hammering. Every small sound in the house felt like a personal assault on my nervous system. I feel so fragile, like I'm made of thin glass.",
+    "timestamp": "2026-01-03T07:30:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
+    "clarity": "Brain Fog",
+    "notes": "Managed to sleep until 4 AM today, but woke up with that familiar 'internal vibrating' feeling. My joints—especially my knuckles—are so stiff I had trouble holding my coffee mug. This isn't just aging; something is profoundly wrong.",
+    "timestamp": "2026-01-04T08:20:00.000000"
+  },
+  {
+    "rest": "3 AM Awakening",
+    "climate": "Heavy",
+    "clarity": "Brain Fog",
+    "notes": "The internal heat is unbearable. It starts in my chest and just rushes up my neck. I stood on the balcony in my robe at 4 AM just to feel the January air—anything to stop the panic. My heart rate was 110 just sitting still.",
     "timestamp": "2026-01-05T07:45:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Heavy",
     "clarity": "Brain Fog",
-    "notes": "Saw Dr. Aris today. I cried in the waiting room. I told her it's not just 'stress'—I know stress, and this is chemical. She finally listened when I showed her the sleep logs. Discussing HRT options next week. Migraine warning signs starting now.",
+    "notes": "Another migraine building up. The aura is a shimmering mess in my peripheral vision. I had to cancel the site visit. I feel like a failure to my partners. Why can't I just be 'fine'?",
+    "timestamp": "2026-01-06T09:10:00.000000"
+  },
+  {
+    "rest": "3 AM Awakening",
+    "climate": "Flashing",
+    "clarity": "Brain Fog",
+    "notes": "Spent the day in a dark room yesterday. Today I feel hungover from the pain. My brain fog is so thick I couldn't even follow a basic budget spreadsheet. The numbers just moved around the page.",
+    "timestamp": "2026-01-07T08:45:00.000000"
+  },
+  {
+    "rest": "3 AM Awakening",
+    "climate": "Heavy",
+    "clarity": "Brain Fog",
+    "notes": "The 3 AM Terror. Convinced myself at 3:30 AM that I have early-onset dementia. It's the only thing that explains the word-finding issues. I'm 45. This shouldn't be happening.",
+    "timestamp": "2026-01-08T07:55:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
+    "clarity": "Brain Fog",
+    "notes": "Short fuse at the firm today. I snapped at my junior architect because he asked a simple question. I'm usually so patient. I don't recognize this version of myself. I feel like an interloper in my own life.",
+    "timestamp": "2026-01-09T21:30:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Heavy",
+    "clarity": "Brain Fog",
+    "notes": "Saw Dr. Aris today. I cried in the waiting room. I told her it's not just 'stress'—I know what stress feels like, and this is chemical. She finally listened when I showed her the symptom patterns. Discussing HRT options next week.",
     "timestamp": "2026-01-10T09:30:00.000000"
   },
   {
     "rest": "3 AM Awakening",
     "climate": "Heavy",
     "clarity": "Brain Fog",
-    "notes": "Full-blown migraine. Spent the day in a dark room. Missed the strategy meeting. I feel like my body is betraying my career. The 3 AM terror was especially bad—convinced myself I'd be fired by noon.",
+    "notes": "The terror was especially bad tonight—convinced myself I'd be fired by noon. Spent the day with an ice pack on my neck. I'm mourning the woman I used to be. Every log entry feels like a eulogy for my executive function.",
     "timestamp": "2026-01-11T11:00:00.000000"
+  },
+  {
+    "rest": "3 AM Awakening",
+    "climate": "Heavy",
+    "clarity": "Brain Fog",
+    "notes": "Night sweat drenching my hair. I had to change the sheets at 4 AM. I'm so tired I feel nauseous. I can't keep a train of thought for more than two minutes. Site visit tomorrow—God help me.",
+    "timestamp": "2026-01-12T07:30:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Flashing",
+    "clarity": "Brain Fog",
+    "notes": "The site visit was a disaster. I forgot the word for 'cantilever' in front of the contractor. He looked at me like I was incompetent. I came home and just sat in the driveway for twenty minutes.",
+    "timestamp": "2026-01-13T19:45:00.000000"
+  },
+  {
+    "rest": "3 AM Awakening",
+    "climate": "Heavy",
+    "clarity": "Brain Fog",
+    "notes": "Another night of adrenaline surges. It feels like my body is sounding an alarm for a fire that isn't there. My hips and knees are aching. I feel like an old woman.",
+    "timestamp": "2026-01-14T08:00:00.000000"
   },
   {
     "rest": "3 AM Awakening",
     "climate": "Flashing",
     "clarity": "Neutral",
-    "notes": "Picked up the prescription today. Estrogen patch and progesterone. I'm nervous about the 'cancer' headlines I've read for years, but the fear of losing my mind is greater. Starting tomorrow.",
+    "notes": "Picked up the prescription today. Estrogen patch and micronized progesterone. I'm nervous about the headlines I've read for years, but the fear of losing my mind is greater. Starting tonight. Please let this work.",
     "timestamp": "2026-01-15T20:00:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Heavy",
+    "clarity": "Neutral",
+    "notes": "First night on the patch. No immediate miracle, obviously. Still woke up at 3 AM, but maybe the heart rate was a bit lower? Or maybe I'm just hopeful. A slight headache today.",
+    "timestamp": "2026-01-16T08:10:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Flashing",
+    "clarity": "Neutral",
+    "notes": "Day 2. Feeling a bit 'itchy' under the patch, but I'll endure it. No migraine yet, which is usually a guarantee during this part of my cycle. I feel a tiny bit more grounded.",
+    "timestamp": "2026-01-17T08:30:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Warm",
     "clarity": "Neutral",
-    "notes": "Day 3 on the patch. Still waking up, but the 'Terror' felt less intense. No migraine today, which is a miracle for this point in my cycle. Skin feels a bit itchy near the patch site.",
+    "notes": "Day 3 on the patch. Still waking up, but the 'Terror' felt less intense—more like an annoyance than a catastrophe. No migraine today. Skin feels a bit itchy near the patch site, but I'll take it over the internal fire.",
     "timestamp": "2026-01-18T08:00:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Warm",
+    "clarity": "Neutral",
+    "notes": "Woke up at 4:30 AM. That's a 90-minute improvement. I feel less like a raw nerve today. The 'vibrating' under my skin is finally quieting down. I actually enjoyed my morning coffee.",
+    "timestamp": "2026-01-19T07:50:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
+    "clarity": "Neutral",
+    "notes": "Managed a full day at the office without snapping at anyone. The brain fog is still there, but it feels less like a wall and more like a mist. I can see through it if I try hard enough.",
+    "timestamp": "2026-01-20T21:00:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "I slept until 6 AM! It wasn't perfect, but it was deep. No night sweat. I feel like my brain was actually allowed to turn off for a few hours. I feel almost... cheerful?",
+    "timestamp": "2026-01-21T07:15:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
     "clarity": "Focused",
-    "notes": "Actually finished the budget report ahead of time! My brain felt 'plugged in' for about four hours straight. The heat is still there, but it's like a low hum instead of a siren. Progesterone at night definitely helps the initial drop-off into sleep.",
+    "notes": "Actually finished the budget report ahead of time! My brain felt 'plugged in' for about four hours straight today. The heat is still there, but it's like a low hum instead of a siren. Progesterone definitely helps.",
     "timestamp": "2026-01-22T07:30:00.000000"
   },
   {
     "rest": "Restorative",
     "climate": "Cool",
     "clarity": "Focused",
-    "notes": "I slept until 6:30 AM. Six and a half hours without a break. I woke up crying because I forgot what it felt like to be rested. No hot flashes yesterday. My hands feel less like wooden blocks.",
-    "timestamp": "2026-01-28T07:00:00.000000"
+    "notes": "Another solid night. I'm starting to trust the patch. My joints are less stiff. I could hold my drafting pen for two hours without my fingers cramping. I feel like I'm getting my tools back.",
+    "timestamp": "2026-01-23T08:40:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
+    "clarity": "Focused",
+    "notes": "A little bit of heat tonight, probably because I was stressed about the board presentation tomorrow. But I'm not panicking. I have my notes, and I have my data. I am prepared.",
+    "timestamp": "2026-01-24T22:10:00.000000"
   },
   {
     "rest": "Restorative",
     "climate": "Cool",
     "clarity": "Focused",
-    "notes": "Handling a crisis at work today and stayed calm. Usually, I'd have a surge of rage or a panic attack. It’s like the 'buffer' is back in my nervous system. Migraine count this month: 2. (Down from 6 in December).",
-    "timestamp": "2026-02-05T08:30:00.000000"
+    "notes": "The presentation went perfectly. No word-finding issues. I felt articulate and sharp. I'm starting to believe I can keep my job. I'm not broken; I was just depleted.",
+    "timestamp": "2026-01-25T19:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "Sunday morning and I feel rested. I'm noticing my skin isn't as dry. My mood is stable. I'm not waiting for the next catastrophe to happen. This is a massive shift.",
+    "timestamp": "2026-01-26T10:00:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Back at the firm and firing on all cylinders. I'm helping the junior architect with a complex load calculation. It feels so good to be useful again. No migraines in two weeks.",
+    "timestamp": "2026-01-27T21:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "I slept until 6:30 AM. Six and a half hours without a break. I woke up crying because I forgot what it felt like to be rested. No hot flashes yesterday. My hand stiffness is almost gone. No Post-its needed.",
+    "timestamp": "2026-01-28T07:00:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Warm",
     "clarity": "Neutral",
-    "notes": "A bit of a dip today. A light migraine and some night sweats returned. Is it because I'm close to my period? Need to ask SELENE if cycle breakthrough is normal even on HRT.",
-    "timestamp": "2026-02-12T07:15:00.000000"
+    "notes": "Woke up once at 4 AM, but fell back asleep within ten minutes. That used to be impossible. I would have been up for hours. My system feels more resilient, even when it's pushed.",
+    "timestamp": "2026-01-29T08:15:00.000000"
   },
   {
     "rest": "Restorative",
     "climate": "Cool",
     "clarity": "Focused",
-    "notes": "Back to baseline. Feeling sharp. The brain fog has cleared enough that I can actually plan for the future again. I’m starting to feel like Helene again, not just a collection of symptoms.",
+    "notes": "A full night's sleep. My brain is clear. I'm starting to track my triggers more carefully. I noticed that high-stress meetings correlate with a bit of warmth that evening, but nothing like before.",
+    "timestamp": "2026-01-30T07:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Ending January on a high note. Thirty days ago, I was a ghost. Now I'm a person again. I have 15 days of 'good' data now. I'm ready for February. I'm finally breathing again.",
+    "timestamp": "2026-01-31T09:20:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "February starts quietly. Slept through. My energy levels are consistent. I'm taking long walks again without my hips screaming at me. The joint pain has settled into a dull, occasional ache.",
+    "timestamp": "2026-02-01T08:00:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Full day at the site today. No fatigue crashes. I feel more like myself than I have in two years. I'm actually making plans for a vacation. I have the mental space for it now.",
+    "timestamp": "2026-02-02T21:45:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "A quiet Tuesday. No symptoms to report, which is the best kind of report. I'm starting to take for granted that I will sleep tonight. That's a dangerous, wonderful luxury.",
+    "timestamp": "2026-02-03T07:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Word retrieval is 100%. My executive function feels restored. I'm managing three projects simultaneously and I'm not dropping any balls. The Post-it notes are officially gone.",
+    "timestamp": "2026-02-04T22:00:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Handling a crisis at work today and stayed calm. Usually, I'd have a surge of rage or a panic attack. It’s like the 'buffer' is back in my nervous system. Migraine count is down. I feel hopeful.",
+    "timestamp": "2026-02-05T08:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "Ending the week strong. I'm less irritable with my family. My husband mentioned that I seem 'lighter.' I feel like a weight has been lifted off my entire existence.",
+    "timestamp": "2026-02-06T21:10:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "A lazy Saturday. No brain fog, even after a busy week. I'm reading a technical book for fun again. I couldn't concentrate on more than a paragraph back in December.",
+    "timestamp": "2026-02-07T10:45:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Ready for the week ahead. No dread. No anxiety. Just a normal Sunday night. I'm so grateful for this stability. I never want to go back to the '3 AM Terror.'",
+    "timestamp": "2026-02-08T22:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Monday morning and I'm sharp. Site meeting went well. I'm noticing that my resilience is higher—small annoyances don't derail my whole day anymore.",
+    "timestamp": "2026-02-09T07:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Another solid day. My mood is consistently positive. I'm not 'masking' anymore; I actually feel good. The patch is doing its job. No hot flashes to report.",
+    "timestamp": "2026-02-10T21:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "Mid-week check-in. Everything is steady. My joints are fluid. I'm taking the stairs at work without my knees clicking. I feel physically younger.",
+    "timestamp": "2026-02-11T08:00:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
+    "clarity": "Neutral",
+    "notes": "A bit of a 'dip' today. A light migraine and some night sweats returned. It’s frustrating, but I know breakthrough is normal even on HRT. I didn't spiral. It's manageable.",
+    "timestamp": "2026-02-12T07:15:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Warm",
+    "clarity": "Neutral",
+    "notes": "Still a bit 'warm' today. My period is starting. The hormonal shift is powerful enough to push through the HRT slightly, but I'm still functional. No 3 AM panic, just restlessness.",
+    "timestamp": "2026-02-13T07:40:00.000000"
+  },
+  {
+    "rest": "Fragmented",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "The migraine eased up quickly today. Usually, it would have stayed for three days. The recovery time is much shorter now. I'm resting and being kind to myself.",
+    "timestamp": "2026-02-14T09:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Back to restorative sleep. The breakthrough dip is over. I'm sharp again. I'm learning to expect these small ripples and not let them freak me out.",
+    "timestamp": "2026-02-15T08:50:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Monday morning and I'm ready. I have a big deadline this week and I'm actually looking forward to the challenge. I have my 'competitive' drive back.",
+    "timestamp": "2026-02-16T07:20:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Deadlines approaching. I'm staying focused and calm. No brain fog. My vocabulary is intact. I feel like a senior partner again, not an imposter.",
+    "timestamp": "2026-02-17T22:10:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "The brain fog has cleared enough that I can actually plan for the future again. Leading the site visit today felt good. I’m starting to feel like Helene again. The mind is sharp.",
     "timestamp": "2026-02-18T08:00:00.000000"
   },
   {
     "rest": "Restorative",
     "climate": "Cool",
     "clarity": "Focused",
-    "notes": "Current state: Stable. It’s February 20th. Looking back at the Jan 1st log makes me realize how far I’ve come. I’m not 100%, but I am functional and hopeful. Migraine-free for 8 days.",
+    "notes": "Final day of the big deadline. We submitted the plans. I feel a sense of accomplishment, not just relief. I'm not just surviving; I'm excelling.",
+    "timestamp": "2026-02-19T19:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "50-day milestone. Looking back at Jan 1st makes me realize I was in a literal 'systemic collapse.' Now I feel functional. I have 50 days of data to show Dr. Aris. I am no longer a ghost.",
     "timestamp": "2026-02-20T09:00:00.000000"
   },
   {
-    "rest": "3 AM Awakening",
-    "climate": "Warm",
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "A relaxed Saturday. I'm noticing that my 'internal weather' is much more predictable. I can plan my life again. No sudden heat waves, no sudden brain meltdowns.",
+    "timestamp": "2026-02-21T10:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Sunday morning and I feel great. No symptoms. Just a normal, healthy 45-year-old woman. It's amazing how much I took this feeling for granted before.",
+    "timestamp": "2026-02-22T08:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Monday morning and I'm ready to roll. The project list is long, but I'm not overwhelmed. My cognitive load capacity has definitely increased.",
+    "timestamp": "2026-02-23T07:10:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Another solid Tuesday. No hot flashes. No migraines. I'm starting to forget what it felt like to be constantly in pain. That's a good kind of forgetting.",
+    "timestamp": "2026-02-24T21:25:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Mid-week check-in. Stability is the theme. My hands are completely fluid. I can drafting for hours with no issues. I feel very lucky to have found a treatment that works.",
+    "timestamp": "2026-02-25T08:05:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Ending the week on a high note. I'm clear-headed and calm. No 'vibrating' under the skin. My nervous system feels settled and quiet.",
+    "timestamp": "2026-02-26T21:50:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
     "clarity": "Neutral",
-    "notes": "I had a migraine today for 2 hours",
-    "timestamp": "2026-02-20T10:52:41.170384"
+    "notes": "A quiet Friday. No symptoms. Just ready for the weekend. I'm noticing my skin is looking much healthier, probably due to better sleep and less cortisol.",
+    "timestamp": "2026-02-27T18:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Leap day! An extra day of feeling good. I spent the morning gardening. My hips and knees are fine. I feel robust. It's a wonderful change.",
+    "timestamp": "2026-02-28T11:00:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "The consistency is the win here. My baseline has shifted. I noticed my skin isn't as dry, and that 'vibrating' feeling hasn't returned in weeks. Work is intense but I’m meeting the load.",
+    "timestamp": "2026-03-01T08:00:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Monday morning. No dread. No fog. I'm starting to mentor a new hire today. I have the patience and clarity to teach, which I definitely didn't have two months ago.",
+    "timestamp": "2026-03-02T07:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Site visit today went smoothly. I remembered every technical term. I felt in command of the project. It's such a relief to not be afraid of my own brain.",
+    "timestamp": "2026-03-03T21:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Wednesday morning. Sleep was deep. No night sweats. My joints are fluid. I'm feeling very stable. I'm ready for the rest of the week.",
+    "timestamp": "2026-03-04T08:10:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Another solid day. My executive function is back to its original state. I'm making complex decisions with confidence. I feel like the Senior Partner again.",
+    "timestamp": "2026-03-05T22:05:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "A quiet Thursday. No symptoms. Just a bit of fatigue from a busy week, but it's normal tiredness, not the soul-crushing exhaustion of January.",
+    "timestamp": "2026-03-06T21:20:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Ending the week on a positive note. Site plans are coming along well. I'm articulate and focused. No internal weather issues at all.",
+    "timestamp": "2026-03-07T19:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Saturday morning and I feel rested. I'm taking a yoga class today. My balance is better and my joints are cooperative. I'm getting my physical life back.",
+    "timestamp": "2026-03-08T10:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Sunday and ready for March. No anxiety. No dread. Just a normal, healthy feeling. I'm so grateful for the data I've collected; it's my evidence of recovery.",
+    "timestamp": "2026-03-09T08:30:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Warm",
-    "clarity": "Brain Fog",
-    "notes": "I had a migraine yesterday night for 2 hours",
-    "timestamp": "2026-02-20T11:16:12.426316"
+    "clarity": "Neutral",
+    "notes": "Had a glass of wine at dinner and the heat returned immediately. It's a clear trigger. I have to be more disciplined. Still, no migraine, so that’s a victory.",
+    "timestamp": "2026-03-10T07:30:00.000000"
   },
   {
     "rest": "Fragmented",
     "climate": "Cool",
-    "clarity": "Brain Fog",
-    "notes": "I had a migraine yesterday for 2 hours",
-    "timestamp": "2026-02-20T11:33:46.876036"
-  },
-  {
-    "rest": "3 AM Awakening",
-    "climate": "Cool",
-    "clarity": "Brain Fog",
-    "notes": "I had a migraine at 8 a.m. for 2 hours",
-    "timestamp": "2026-02-20T15:06:49.755194"
-  },
-  {
-    "rest": "Fragmented",
-    "climate": "Flashing",
     "clarity": "Neutral",
-    "notes": "",
-    "timestamp": "2026-02-23T16:15:40.240566"
+    "notes": "Recovery from the wine trigger. Woke up once at 4 AM, but fell back asleep. My body is more sensitive to triggers now, but it also recovers faster.",
+    "timestamp": "2026-03-11T08:10:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Back to baseline. Slept through. I'm learning that my choices matter so much more now. Stability requires effort, but it's so worth it.",
+    "timestamp": "2026-03-12T07:45:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Friday and feeling good. I'm lead on the new commercial project. I have the energy and the focus to drive it forward. No brain fog.",
+    "timestamp": "2026-03-13T21:55:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "A quiet Saturday. No symptoms. Just resting and recharging. I'm noticing that my 'mental load' feels much lighter when I'm not fighting my own body.",
+    "timestamp": "2026-03-14T10:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Sunday morning. No dread. Site visits this week should be easy. I'm in control and I'm prepared. The 90-day milestone is approaching.",
+    "timestamp": "2026-03-15T08:50:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Monday morning. Sharp and ready. I'm noticing that my word retrieval is actually better than it was before the collapse—maybe because I'm more intentional now.",
+    "timestamp": "2026-03-16T07:25:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Tuesday site visit. Flawless. No technical stumbles. I feel like I'm finally back to my professional peak. No hot flashes to report.",
+    "timestamp": "2026-03-17T21:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Wednesday morning. Sleep was deep. My joints are fluid. I'm feeling very stable and robust. No ripples this week at all.",
+    "timestamp": "2026-03-18T08:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Another solid Thursday. I'm making complex structural decisions with ease. I feel articulate and in command. No internal weather issues.",
+    "timestamp": "2026-03-19T22:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "A quiet Friday. No symptoms. Ready for the weekend. I'm planning my clinical follow-up for next week. I have so much data to share.",
+    "timestamp": "2026-03-20T21:05:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Saturday and feeling great. I'm noticing my resilience is consistent. No sudden mood drops, no sudden fatigue. Just a steady, healthy baseline.",
+    "timestamp": "2026-03-21T10:45:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "I finally feel like I have my 'edge' back at the firm. I'm presenting to the board tomorrow and I'm not afraid of forgetting my words. The joint pain has settled.",
+    "timestamp": "2026-03-22T08:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "The presentation went perfectly. No cognitive glitches at all. I felt sharp and articulate. My partners noticed the difference. I am back.",
+    "timestamp": "2026-03-23T20:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Tuesday and steady. No hot flashes. No migraines. I'm starting to take for granted that I will feel good today. That is the ultimate win.",
+    "timestamp": "2026-03-24T21:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Wednesday check-in. Everything is fluid and clear. No Ripples. I'm ready for the final week of the 90-day block. I feel like a researcher.",
+    "timestamp": "2026-03-25T08:10:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Another solid Thursday. I'm managing the work load with ease. No brain fog. My vocabulary is completely intact. I feel very stable.",
+    "timestamp": "2026-03-26T22:15:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Neutral",
+    "notes": "Ending the week on a positive note. Ready for the weekend. I'm looking back at my Jan 1st logs—it feels like a different lifetime.",
+    "timestamp": "2026-03-27T21:05:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Saturday morning. No symptoms. Just resting and enjoying the clarity. I feel robust and healthy. I'm planning for a big hike next weekend.",
+    "timestamp": "2026-03-28T10:45:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Sunday morning and I'm ready. No dread. No anxiety. Just a normal Sunday. I'm so grateful for this stability. The 90-day data is nearly complete.",
+    "timestamp": "2026-03-29T08:30:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Monday morning. Sharp and ready. Site visit today should be a breeze. I'm in control. No technical stumbles. No internal weather issues.",
+    "timestamp": "2026-03-30T07:25:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Tuesday site visit. Flawless. I felt in command of every detail. It's such a relief to not be afraid of my own brain. My vocabulary is solid.",
+    "timestamp": "2026-03-31T21:40:00.000000"
+  },
+  {
+    "rest": "Restorative",
+    "climate": "Cool",
+    "clarity": "Focused",
+    "notes": "Three months in. I’ve gone from a '3 AM Terror' to 7 hours of sleep. I'm finishing this 90-day block feeling like a researcher of my own life. I am no longer a dismissed patient. I am the architect of my own recovery.",
+    "timestamp": "2026-04-01T09:00:00.000000"
   }
 ]
