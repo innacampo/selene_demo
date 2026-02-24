@@ -6,7 +6,7 @@ sdk: docker
 app_file: app.py
 pinned: false
 license: cc-by-4.0
-short_description: Privacy-first menopause assistant powered by MedGemma
+short_description: Privacy-first menopause assistant (MedGemma demo)
 suggested_hardware: t4-small
 models:
   - google/medgemma-1.5-4b-it
@@ -19,11 +19,14 @@ models:
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B.svg)](https://streamlit.io)
 
-> Menopause assistant: symptom tracking, RAG-backed chat, and clinician-style summaries powered by [MedGemma](https://huggingface.co/google/medgemma-1.5-4b-it) on the Hugging Face Inference API.
+> Privacy-first menopause assistant: symptom tracking, RAG-backed chat, and clinician-style summaries — designed to run **fully offline** with local LLMs.
+
+> **This is the interactive demo** of SELENE, running [MedGemma](https://huggingface.co/google/medgemma-1.5-4b-it) on a Hugging Face GPU Space so you can try the UX without installing anything. The production version runs entirely locally via [Ollama](https://ollama.com) with no internet calls whatsoever.
 
 ## Overview
 
-- **LLM backend**: calls `google/medgemma-1.5-4b-it` via the HF serverless Inference API (requires `HF_TOKEN`).
+- **Demo backend**: runs `google/medgemma-1.5-4b-it` locally on a HF GPU Space via `transformers` (requires `HF_TOKEN` for model access).
+- **Production backend**: runs any compatible model via Ollama — fully offline, zero data leaves your machine.
 - **Core flows**: Daily Attune logging, chat with RAG + safety guardrails, clinical insight reports with PDF export.
 
 ## Key Features
@@ -50,14 +53,14 @@ models:
 
 ## Quick Start
 
-### Deploy on Hugging Face Spaces (recommended)
+### Deploy on Hugging Face Spaces (demo)
 
-1. Create a new Space on [huggingface.co/new-space](https://huggingface.co/new-space) with **Streamlit** SDK.
+1. Create a new Space on [huggingface.co/new-space](https://huggingface.co/new-space) with **Docker** SDK and **T4 small** GPU.
 2. Push this repo to the Space.
 3. Add your `HF_TOKEN` as a **Space secret** (Settings → Repository secrets).
-4. The app will start automatically on port 7860.
+4. The app will build and start automatically on port 7860.
 
-### Run locally
+### Run locally (production — fully offline)
 
 ```bash
 # 1. Clone the repository
