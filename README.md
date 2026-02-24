@@ -7,6 +7,7 @@ app_file: app.py
 pinned: false
 license: cc-by-4.0
 short_description: Privacy-first menopause assistant powered by MedGemma
+suggested_hardware: t4-small
 models:
   - google/medgemma-1.5-4b-it
 ---

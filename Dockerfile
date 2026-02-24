@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
 
 WORKDIR /app
 
@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    pkg-config \
+    libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies first (layer cache)
@@ -15,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir .
 
 # Ensure selene package is always importable (belt-and-suspenders)
-ENV PYTHONPATH="/app/src:${PYTHONPATH}"
+ENV PYTHONPATH="/app/src"
 
 # Copy application code and static assets
 COPY app.py ./

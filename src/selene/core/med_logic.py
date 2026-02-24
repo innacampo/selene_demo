@@ -1,9 +1,9 @@
 """
-MedGemma RAG Logic Module - Hugging Face Inference API Version
+MedGemma RAG Logic Module - Local Transformers Version
 Includes: User Context, Query Contextualization, Rolling Buffer, and TTL Caching.
 
-Calls google/medgemma-1.5-4b-it via the HF serverless Inference API using
-``huggingface_hub.InferenceClient``.  No local Ollama server required.
+Loads google/medgemma-1.5-4b-it locally via ``transformers`` and runs inference
+on the GPU available in the HF Space.  No external API calls required.
 
 DEBUG MODE: Set environment variable DEBUG_MEDLOGIC=1 for verbose output.
 """
@@ -20,7 +20,6 @@ from typing import Any
 import chromadb
 import streamlit as st
 from chromadb.config import Settings as ChromaSettings
-from huggingface_hub import InferenceClient
 
 from selene import settings
 
@@ -34,27 +33,38 @@ if DEBUG_MODE:
     logger.debug("MedLogic DEBUG MODE ENABLED")
     logger.debug("=" * 60)
 
-# Module-level HF Inference client (lazy-initialised via _get_hf_client)
-_hf_client: InferenceClient | None = None
+# Module-level model and processor (lazy-initialised via _get_model)
+_model = None
+_processor = None
+_model_lock = threading.Lock()
 
 
-def _get_hf_client() -> InferenceClient:
-    """Return a singleton ``InferenceClient`` for the configured HF model."""
-    global _hf_client
-    if _hf_client is None:
-        token = settings.HF_TOKEN
-        if not token:
-            raise RuntimeError(
-                "HF_TOKEN is not set. Add it as a Hugging Face Space secret "
-                "or export HF_TOKEN=hf_... in your environment."
-            )
-        _hf_client = InferenceClient(
-            model=settings.HF_MODEL_ID,
-            token=token,
-            timeout=settings.HF_TIMEOUT,
-        )
-        logger.info("HF InferenceClient initialised for model %s", settings.HF_MODEL_ID)
-    return _hf_client
+def _get_model():
+    """Return a singleton (model, processor) tuple, loading weights once."""
+    global _model, _processor
+    if _model is None:
+        with _model_lock:
+            if _model is None:  # double-checked locking
+                import torch
+                from transformers import AutoModelForImageTextToText, AutoProcessor
+
+                token = settings.HF_TOKEN
+                if not token:
+                    raise RuntimeError(
+                        "HF_TOKEN is not set. Add it as a Hugging Face Space secret "
+                        "or export HF_TOKEN=hf_... in your environment."
+                    )
+                model_id = settings.HF_MODEL_ID
+                logger.info("Loading model %s …", model_id)
+                _processor = AutoProcessor.from_pretrained(model_id, token=token)
+                _model = AutoModelForImageTextToText.from_pretrained(
+                    model_id,
+                    token=token,
+                    torch_dtype=torch.bfloat16,
+                    device_map="auto",
+                )
+                logger.info("Model loaded on %s", _model.device)
+    return _model, _processor
 
 
 # ============================================================================
@@ -70,7 +80,6 @@ class Config:
     EMBEDDING_MODEL = settings.EMBEDDING_MODEL
     LLM_MODEL = settings.LLM_MODEL
     HF_MODEL_ID = settings.HF_MODEL_ID
-    HF_TIMEOUT = settings.HF_TIMEOUT
     RAG_TOP_K = settings.RAG_TOP_K
     CHAT_HISTORY_TOP_K = settings.CHAT_HISTORY_TOP_K
     CHAT_HISTORY_DISTANCE_THRESHOLD = settings.CHAT_HISTORY_DISTANCE_THRESHOLD
@@ -223,12 +232,10 @@ def get_user_context_hash() -> str:
 
 
 def is_hf_api_available() -> bool:
-    """Check if the HF Inference API is reachable and the token is valid."""
-    logger.debug("is_hf_api_available: Checking HF Inference API...")
+    """Check if the local model is loaded (or loadable) and ready."""
+    logger.debug("is_hf_api_available: Checking local model availability...")
     try:
-        client = _get_hf_client()
-        # A lightweight call to verify connectivity
-        client.model_info(settings.HF_MODEL_ID)
+        _get_model()
         logger.debug("is_hf_api_available: OK")
         return True
     except Exception as e:
@@ -497,7 +504,7 @@ def _build_medgemma_messages(
     """
     Build the chat-completion messages list for MedGemma.
     Returns a list of ``{"role": ..., "content": ...}`` dicts suitable for
-    ``InferenceClient.chat_completion()``.
+    ``processor.apply_chat_template()``.
     """
     logger.debug("=" * 60)
     logger.debug("_build_medgemma_messages: ENTER")
@@ -619,23 +626,34 @@ def call_medgemma(
     recent_history: list[dict] | None = None,
 ) -> str:
     """
-    Call MedGemma via HF Inference API and return the complete response.
+    Run MedGemma locally via transformers and return the complete response.
     Uses cached user context to avoid rebuilding on every call.
     """
+    import torch
+
     messages = _build_medgemma_messages(prompt, context, chat_context, recent_history)
     try:
         start_time = time.time()
-        client = _get_hf_client()
-        logger.debug(f"  Calling HF chat_completion (model={Config.HF_MODEL_ID})...")
-        response = client.chat_completion(
-            messages=messages,
-            max_tokens=512,
-            temperature=0.2,
-            top_p=0.8,
-            stop=["Patient:", "=== USER PROFILE ===", "Note:", "Disclaimer:"],
-        )
+        model, processor = _get_model()
+        logger.debug(f"  Running local inference (model={Config.HF_MODEL_ID})...")
+        inputs = processor.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+            return_tensors="pt",
+        ).to(model.device, dtype=torch.bfloat16)
+        input_len = inputs["input_ids"].shape[-1]
+        with torch.inference_mode():
+            generation = model.generate(
+                **inputs,
+                max_new_tokens=512,
+                do_sample=True,
+                temperature=0.2,
+                top_p=0.8,
+            )
+        result = processor.decode(generation[0][input_len:], skip_special_tokens=True)
         duration = time.time() - start_time
-        result = response.choices[0].message.content
         logger.info(f"call_medgemma: received {len(result)} chars in {duration:.3f}s")
         logger.debug(
             f"  Response preview: '{result[:100]}...'"
@@ -655,30 +673,48 @@ def call_medgemma_stream(
     recent_history: list[dict] | None = None,
 ):
     """
-    Call MedGemma with streaming via HF Inference API.
-    Yields response text chunks as they arrive.
+    Run MedGemma locally with streaming via TextIteratorStreamer.
+    Yields response text chunks as they are generated.
     """
+    import torch
+    from threading import Thread
+    from transformers import TextIteratorStreamer
+
     messages = _build_medgemma_messages(prompt, context, chat_context, recent_history)
     try:
         start_time = time.time()
-        client = _get_hf_client()
-        logger.debug("  HF streaming mode enabled")
-        stream = client.chat_completion(
-            messages=messages,
-            max_tokens=512,
+        model, processor = _get_model()
+        logger.debug("  Local streaming mode enabled")
+        inputs = processor.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+            return_tensors="pt",
+        ).to(model.device, dtype=torch.bfloat16)
+        input_len = inputs["input_ids"].shape[-1]
+
+        streamer = TextIteratorStreamer(processor, skip_prompt=True, skip_special_tokens=True)
+        generation_kwargs = dict(
+            **inputs,
+            max_new_tokens=512,
+            do_sample=True,
             temperature=0.2,
             top_p=0.8,
-            stop=["Patient:", "=== USER PROFILE ===", "Note:", "Disclaimer:"],
-            stream=True,
+            streamer=streamer,
         )
+        thread = Thread(target=model.generate, kwargs=generation_kwargs)
+        thread.start()
+
         chunk_count = 0
         total_chars = 0
-        for chunk in stream:
-            if chunk.choices and chunk.choices[0].delta.content:
-                text = chunk.choices[0].delta.content
+        for text in streamer:
+            if text:
                 chunk_count += 1
                 total_chars += len(text)
                 yield text
+
+        thread.join()
         duration = time.time() - start_time
         logger.info(
             f"call_medgemma_stream: streamed {chunk_count} chunks, {total_chars} chars in {duration:.3f}s"

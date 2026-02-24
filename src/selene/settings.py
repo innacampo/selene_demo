@@ -41,18 +41,14 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CHROMA_TELEMETRY = False
 
 # ============================================================================
-# LLM / Hugging Face Inference API
+# LLM / MedGemma (local transformers inference)
 # ============================================================================
 
-# HF_TOKEN is read from environment (set as a Space secret on HF Spaces,
-# or export HF_TOKEN=hf_... locally).
+# HF_TOKEN is still needed to download gated model weights.
 HF_TOKEN: str | None = os.environ.get("HF_TOKEN")
 
 # Model repo on Hugging Face Hub
 HF_MODEL_ID = "google/medgemma-1.5-4b-it"
-
-# Request timeout for HF Inference API calls (seconds)
-HF_TIMEOUT = 120
 
 # Legacy alias kept so imports that reference LLM_MODEL still resolve.
 LLM_MODEL = HF_MODEL_ID

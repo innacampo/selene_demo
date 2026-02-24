@@ -1,4 +1,7 @@
 streamlit>=1.35
+transformers>=4.50
+torch>=2.0
+accelerate>=0.26
 huggingface_hub>=0.25
 chromadb>=0.4
 numpy>=1.24
