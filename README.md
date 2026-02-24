@@ -44,7 +44,6 @@ models:
 - Insights reporting: [insights_generator.py](src/selene/core/insights_generator.py), UI in [views/clinical.py](src/selene/ui/views/clinical.py)
 - Streamlit views: [views/home.py](src/selene/ui/views/home.py), [views/pulse.py](src/selene/ui/views/pulse.py), [views/chat.py](src/selene/ui/views/chat.py), [views/clinical.py](src/selene/ui/views/clinical.py)
 - Configuration: [settings.py](src/selene/settings.py)
-- Full details: [docs/technical_reference.md](docs/technical_reference.md)
 
 ## Prerequisites
 - Python 3.11+
@@ -82,22 +81,19 @@ streamlit run app.py
 ## Repository Structure
 
 ```
-selene/
-├── app.py                    # Thin entry point (from selene.ui.app import main)
+selene_demo/
+├── app.py                    # Thin entry point
+├── Dockerfile                # HF Spaces Docker build
 ├── src/selene/               # Installable Python package
 │   ├── core/                 # Business logic (med_logic, context, analysis)
 │   ├── storage/              # Persistence (data_manager, chat_db)
 │   └── ui/                   # Streamlit UI & views
-├── tests/                    # Test suite (pytest)
-├── scripts/                  # Utility scripts (setup, KB management)
-├── docs/                     # Documentation and guides
-├── examples/                 # Example code and usage demonstrations
-├── data/                     # Data directories (mostly gitignored)
+├── data/
+│   ├── metadata/stages.json  # Menopause stage definitions
+│   └── user_data/user_med_db # ChromaDB knowledge base
 ├── pyproject.toml            # Build config & metadata
 └── requirements.txt          # Dependencies
 ```
-
-See [DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md) for the full tree.
 
 ## Usage
 
@@ -117,37 +113,17 @@ See [DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md) for the full tree.
 - HF_TOKEN read from environment; model defaults to `google/medgemma-1.5-4b-it`.
 - Logging defaults to INFO on Spaces; set `LOG_LEVEL=DEBUG` and `LOG_TO_FILE=1` for local development.
 
-## Knowledge Base Management
+## Knowledge Base
 - Chroma collections live under `data/user_data/user_med_db`; embeddings via SentenceTransformer all-MiniLM-L6-v2.
-- Import/export and collection maintenance via [scripts/update_kb_chroma.py](scripts/update_kb_chroma.py) (keeps collection IDs stable).
+- Pre-built from peer-reviewed menopause literature; loaded at container start.
 
 ## Safety & Guardrails
 - Deterministic risk scoring (recent 7–14 days) flags severe/rapid changes and concerning notes; injected into chat/report prompts for conservative language and referrals.
 - MedGemma calls use low temperature (≤0.2) and stop tokens; evidence sections include source headers.
 - Contextualization cache reduces ambiguous follow-ups; RAG returns empty-safe outputs if DB is empty.
 
-## Testing
-
-```bash
-# Run the test suite
-python -m pytest tests/ -v
-
-# With coverage
-python -m pytest tests/ -v --cov=src/selene --cov-report=term-missing
-```
-
-Coverage focus (see [tests/README.md](tests/README.md)):
-- `test_deterministic_analysis.py` — symptom mapping/stats/patterns/risk formatting
-- `test_context_builder.py` — profile/pulse context, notes/chat aggregation, completeness scoring
-- `test_med_logic_cache.py` — TTL cache behavior, eviction, stats, and cache invalidation helpers
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
-
 ## License
 
-This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) - see [LICENSE](LICENSE) for details.
+This project is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — see [LICENSE](LICENSE) for details.
 
-## More Documentation
-- Engineering guide: [docs/technical_reference.md](docs/technical_reference.md)
+The full SELENE project (with Ollama backend, tests, scripts, docs, and contributing guidelines) lives at [github.com/innacampo/selene](https://github.com/innacampo/selene).
