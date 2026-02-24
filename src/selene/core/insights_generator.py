@@ -442,8 +442,9 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
 
                 llm_model, processor = _get_model()
                 messages = [
-                    {"role": "system", "content": system_instruction},
-                    {"role": "user", "content": prompt},
+                    {"role": "user", "content": [
+                        {"type": "text", "text": f"{system_instruction}\n\n{prompt}"},
+                    ]},
                 ]
                 inputs = processor.apply_chat_template(
                     messages,

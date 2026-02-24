@@ -586,8 +586,9 @@ def _build_medgemma_messages(
         user_message = prompt
 
     messages = [
-        {"role": "system", "content": system_instruction},
-        {"role": "user", "content": user_message},
+        {"role": "user", "content": [
+            {"type": "text", "text": f"{system_instruction}\n\n{user_message}"},
+        ]},
     ]
 
     # Prompt size debugging
