@@ -91,20 +91,20 @@ def render_home():
             go_to_page("pulse")
             st.rerun()
 
-    # # Demo notice
-    # st.markdown(
-    #     """
-    #     <div class="demo-notice">
-    #         <p>
-    #             This is a working prototype demonstrating SELENE architecture.
-    #             <br>
-    #         </p>
-    #         <a href="https://github.com/innacampo/selene"
-    #            class="github-link"
-    #            target="_blank">
-    #             <span>View on GitHub</span>
-    #         </a>
-    #     </div>
-    #     """,
-    #     unsafe_allow_html=True,
-    # )
+# Demo notice
+    st.markdown(
+        """
+        <div class="demo-notice">
+            <p>
+                This is a working prototype demonstrating SELENE architecture.
+                <br>
+            </p>
+            <a href="https://github.com/innacampo/selene"
+               class="github-link"
+               target="_blank">
+                <span>View on GitHub</span>
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    ) 
