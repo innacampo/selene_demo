@@ -1,6 +1,5 @@
 ---
 title: SELENE
-emoji: 🌙
 colorFrom: indigo
 colorTo: blue
 sdk: streamlit
