@@ -48,8 +48,7 @@ CHROMA_TELEMETRY = False
 HF_TOKEN: str | None = os.environ.get("HF_TOKEN")
 
 # Model repo on Hugging Face Hub (override with HF_MODEL_ID env var)
-# HF_MODEL_ID = os.environ.get("HF_MODEL_ID", "google/medgemma-1.5-4b-it")
-HF_MODEL_ID = os.environ.get("HF_MODEL_ID", "google/gemma-3-1b-it")
+HF_MODEL_ID = os.environ.get("HF_MODEL_ID", "google/medgemma-1.5-4b-it")
 
 # Legacy alias kept so imports that reference LLM_MODEL still resolve.
 LLM_MODEL = HF_MODEL_ID
