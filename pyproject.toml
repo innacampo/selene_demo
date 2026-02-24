@@ -37,7 +37,7 @@ classifiers = [
 ]
 dependencies = [
     "streamlit>=1.35",
-    "requests>=2.28",
+    "huggingface_hub>=0.25",
     "chromadb>=0.4",
     "numpy>=1.24",
     "scipy>=1.10",

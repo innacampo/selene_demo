@@ -1,15 +1,16 @@
 """
-MedGemma RAG Logic Module - Optimized Version with Caching
+MedGemma RAG Logic Module - Hugging Face Inference API Version
 Includes: User Context, Query Contextualization, Rolling Buffer, and TTL Caching.
+
+Calls google/medgemma-1.5-4b-it via the HF serverless Inference API using
+``huggingface_hub.InferenceClient``.  No local Ollama server required.
 
 DEBUG MODE: Set environment variable DEBUG_MEDLOGIC=1 for verbose output.
 """
 
 import hashlib
-import json
 import logging
 import os
-import subprocess
 import threading
 import time
 from dataclasses import dataclass
@@ -17,9 +18,9 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import chromadb
-import requests
 import streamlit as st
 from chromadb.config import Settings as ChromaSettings
+from huggingface_hub import InferenceClient
 
 from selene import settings
 
@@ -33,8 +34,28 @@ if DEBUG_MODE:
     logger.debug("MedLogic DEBUG MODE ENABLED")
     logger.debug("=" * 60)
 
-# Module-level HTTP session for connection reuse
-_http_session = requests.Session()
+# Module-level HF Inference client (lazy-initialised via _get_hf_client)
+_hf_client: InferenceClient | None = None
+
+
+def _get_hf_client() -> InferenceClient:
+    """Return a singleton ``InferenceClient`` for the configured HF model."""
+    global _hf_client
+    if _hf_client is None:
+        token = settings.HF_TOKEN
+        if not token:
+            raise RuntimeError(
+                "HF_TOKEN is not set. Add it as a Hugging Face Space secret "
+                "or export HF_TOKEN=hf_... in your environment."
+            )
+        _hf_client = InferenceClient(
+            model=settings.HF_MODEL_ID,
+            token=token,
+            timeout=settings.HF_TIMEOUT,
+        )
+        logger.info("HF InferenceClient initialised for model %s", settings.HF_MODEL_ID)
+    return _hf_client
+
 
 # ============================================================================
 # Configuration
@@ -48,8 +69,8 @@ class Config:
     COLLECTION_NAME = settings.MEDICAL_DOCS_COLLECTION
     EMBEDDING_MODEL = settings.EMBEDDING_MODEL
     LLM_MODEL = settings.LLM_MODEL
-    OLLAMA_BASE_URL = settings.OLLAMA_BASE_URL
-    OLLAMA_TIMEOUT = settings.OLLAMA_TIMEOUT
+    HF_MODEL_ID = settings.HF_MODEL_ID
+    HF_TIMEOUT = settings.HF_TIMEOUT
     RAG_TOP_K = settings.RAG_TOP_K
     CHAT_HISTORY_TOP_K = settings.CHAT_HISTORY_TOP_K
     CHAT_HISTORY_DISTANCE_THRESHOLD = settings.CHAT_HISTORY_DISTANCE_THRESHOLD
@@ -197,69 +218,22 @@ def get_user_context_hash() -> str:
 
 
 # ============================================================================
-# Ollama Management
+# HF Inference API Health Check
 # ============================================================================
 
 
-def is_ollama_running() -> bool:
-    """Check if Ollama server is responding."""
-    logger.debug(f"is_ollama_running: Checking {Config.OLLAMA_BASE_URL}...")
+def is_hf_api_available() -> bool:
+    """Check if the HF Inference API is reachable and the token is valid."""
+    logger.debug("is_hf_api_available: Checking HF Inference API...")
     try:
-        start = time.time()
-        response = _http_session.get(f"{Config.OLLAMA_BASE_URL}/api/tags", timeout=2)
-        duration = time.time() - start
-        is_running = response.status_code == 200
-        logger.debug(
-            f"is_ollama_running: status={response.status_code}, duration={duration:.3f}s, running={is_running}"
-        )
-        return is_running
-    except requests.exceptions.RequestException as e:
-        logger.debug(f"is_ollama_running: FAILED - {type(e).__name__}: {e}")
-        return False
-
-
-def is_model_available(model_name: str) -> bool:
-    """Check if specific model is loaded in Ollama."""
-    logger.debug(f"is_model_available: Checking for model '{model_name}'...")
-    try:
-        response = _http_session.get(f"{Config.OLLAMA_BASE_URL}/api/tags", timeout=5)
-        if response.status_code == 200:
-            models = response.json().get("models", [])
-            model_names = [m.get("name", "") for m in models]
-            logger.debug(f"is_model_available: Available models: {model_names}")
-            available = any(m.startswith(model_name) for m in model_names)
-            logger.debug(f"is_model_available: '{model_name}' available={available}")
-            return available
-    except requests.exceptions.RequestException as e:
-        logger.debug(f"is_model_available: FAILED - {type(e).__name__}: {e}")
-    return False
-
-
-def start_ollama() -> str:
-    """Start Ollama server if not running."""
-    logger.debug("start_ollama: Attempting to start Ollama...")
-    if is_ollama_running():
-        logger.debug("start_ollama: Already running, skipping start")
-        return "✓ Ollama already running"
-    try:
-        logger.debug("start_ollama: Launching 'ollama serve' process...")
-        subprocess.Popen(
-            ["ollama", "serve"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-        for i in range(10):
-            logger.debug(f"start_ollama: Waiting for startup... attempt {i + 1}/10")
-            if is_ollama_running():
-                logger.debug("start_ollama: Successfully started")
-                return "✓ Ollama started"
-            time.sleep(1)
-        logger.warning("start_ollama: Startup taking longer than expected")
-        return "⚠ Ollama starting slowly..."
+        client = _get_hf_client()
+        # A lightweight call to verify connectivity
+        client.model_info(settings.HF_MODEL_ID)
+        logger.debug("is_hf_api_available: OK")
+        return True
     except Exception as e:
-        logger.error(f"start_ollama: FAILED - {type(e).__name__}: {e}")
-        return f"✗ Failed to start Ollama: {e}"
+        logger.debug(f"is_hf_api_available: FAILED - {type(e).__name__}: {e}")
+        return False
 
 
 # ============================================================================
@@ -328,33 +302,27 @@ def contextualize_query(query: str, history: list[dict]) -> str:
         logger.debug("  CACHE HIT: returning cached result")
         return cached_result
 
-    logger.debug("  CACHE MISS: calling LLM for contextualization...")
+    logger.debug("  CACHE MISS: calling HF API for contextualization...")
 
-    # Cache miss - perform contextualization
+    # Cache miss - perform contextualization via HF Inference API
     history_txt = "\n".join([f"{m['role'].title()}: {m['content']}" for m in history[-2:]])
-    prompt = (
+    user_message = (
         f"Conversation:\n{history_txt}\n\nUser's follow-up: {query}\n\n"
         f"Task: Rewrite the follow-up as a standalone question. Output ONLY the rewritten text."
     )
-    logger.debug(f"  Prompt length: {len(prompt)} chars")
-
-    payload = {
-        "model": Config.LLM_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        "options": {"temperature": 0.1},
-    }
+    logger.debug(f"  Prompt length: {len(user_message)} chars")
 
     try:
         start_time = time.time()
-        logger.debug(f"  POST to {Config.OLLAMA_BASE_URL}/api/generate...")
-        response = _http_session.post(
-            f"{Config.OLLAMA_BASE_URL}/api/generate", json=payload, timeout=5
+        client = _get_hf_client()
+        response = client.chat_completion(
+            messages=[{"role": "user", "content": user_message}],
+            max_tokens=128,
+            temperature=0.1,
         )
         duration = time.time() - start_time
-        logger.debug(f"  Response status: {response.status_code}, duration: {duration:.3f}s")
 
-        rewritten = response.json().get("response", "").strip()
+        rewritten = response.choices[0].message.content.strip()
         logger.debug(
             f"  Rewritten query: '{rewritten[:100]}...'"
             if len(rewritten) > 100
@@ -520,25 +488,24 @@ def get_user_context_cached() -> str:
         return ""
 
 
-def _prepare_medgemma_request(
+def _build_medgemma_messages(
     prompt: str,
     context: str = "",
     chat_context: str = "",
     recent_history: list[dict] | None = None,
-    stream: bool = False,
-) -> dict:
+) -> list[dict]:
     """
-    Build the complete MedGemma request payload with all context layers.
-    Shared setup for both streaming and non-streaming calls.
+    Build the chat-completion messages list for MedGemma.
+    Returns a list of ``{"role": ..., "content": ...}`` dicts suitable for
+    ``InferenceClient.chat_completion()``.
     """
     logger.debug("=" * 60)
-    logger.debug("_prepare_medgemma_request: ENTER")
+    logger.debug("_build_medgemma_messages: ENTER")
     logger.debug(f"  Prompt: '{prompt[:80]}...'" if len(prompt) > 80 else f"  Prompt: '{prompt}'")
     logger.debug(f"  Context length: {len(context)} chars")
     logger.debug(f"  Chat context length: {len(chat_context)} chars")
     logger.debug(f"  Recent history: {len(recent_history) if recent_history else 0} messages")
-    logger.debug(f"  Stream mode: {stream}")
-    logger.debug(f"  Model: {Config.LLM_MODEL}")
+    logger.debug(f"  Model: {Config.HF_MODEL_ID}")
 
     # Get user context (cached)
     logger.debug("  Fetching user context...")
@@ -596,10 +563,10 @@ def _prepare_medgemma_request(
         hist_str = "[IMMEDIATE CONVERSATION HISTORY]:\n" + "".join(buffered_messages)
         sections.append(hist_str)
 
-    # Assemble the full prompt with "Double-Wrap"
+    # Assemble the user message with "Double-Wrap"
     if sections:
         combined_context = "\n\n---\n\n".join(sections)
-        full_prompt = (
+        user_message = (
             f"PRIMARY TASK: Analyze the user's situation and provide insight.\n"
             f"Patient Question: {prompt}\n\n"
             f"---\n\n"
@@ -609,23 +576,15 @@ def _prepare_medgemma_request(
             f"Provide a clear, direct explanation for the patient:"
         )
     else:
-        full_prompt = prompt
+        user_message = prompt
 
-    payload = {
-        "model": Config.LLM_MODEL,
-        "prompt": full_prompt,
-        "system": system_instruction,
-        "stream": stream,
-        "options": {
-            "temperature": 0.2,
-            "top_p": 0.8,
-            "num_predict": 512,
-            "stop": ["Patient:", "=== USER PROFILE ===", "Note:", "Disclaimer:"],
-        },
-    }
+    messages = [
+        {"role": "system", "content": system_instruction},
+        {"role": "user", "content": user_message},
+    ]
 
     # Prompt size debugging
-    total_len = len(full_prompt)
+    total_len = len(user_message)
     base_len = len(system_instruction)
     user_len = len(user_context) if user_context else 0
     rag_len = len(context) if context else 0
@@ -650,7 +609,7 @@ def _prepare_medgemma_request(
     )
     logger.info(f"  - TOTAL:          {total_len:>6}")
 
-    return payload
+    return messages
 
 
 def call_medgemma(
@@ -660,22 +619,23 @@ def call_medgemma(
     recent_history: list[dict] | None = None,
 ) -> str:
     """
-    Call MedGemma and return the complete response as a string.
+    Call MedGemma via HF Inference API and return the complete response.
     Uses cached user context to avoid rebuilding on every call.
     """
-    payload = _prepare_medgemma_request(prompt, context, chat_context, recent_history, stream=False)
+    messages = _build_medgemma_messages(prompt, context, chat_context, recent_history)
     try:
         start_time = time.time()
-        logger.debug(
-            f"  POST to {Config.OLLAMA_BASE_URL}/api/generate (timeout={Config.OLLAMA_TIMEOUT}s)..."
-        )
-        response = _http_session.post(
-            f"{Config.OLLAMA_BASE_URL}/api/generate",
-            json=payload,
-            timeout=Config.OLLAMA_TIMEOUT,
+        client = _get_hf_client()
+        logger.debug(f"  Calling HF chat_completion (model={Config.HF_MODEL_ID})...")
+        response = client.chat_completion(
+            messages=messages,
+            max_tokens=512,
+            temperature=0.2,
+            top_p=0.8,
+            stop=["Patient:", "=== USER PROFILE ===", "Note:", "Disclaimer:"],
         )
         duration = time.time() - start_time
-        result = response.json().get("response", "")
+        result = response.choices[0].message.content
         logger.info(f"call_medgemma: received {len(result)} chars in {duration:.3f}s")
         logger.debug(
             f"  Response preview: '{result[:100]}...'"
@@ -683,13 +643,8 @@ def call_medgemma(
             else f"  Response: '{result}'"
         )
         return result
-    except requests.exceptions.Timeout as e:
-        duration = time.time() - start_time
-        logger.error(f"call_medgemma: TIMEOUT after {duration:.3f}s - {e}")
-        return f"Error: Request timed out after {Config.OLLAMA_TIMEOUT}s"
     except Exception as e:
-        duration = time.time() - start_time
-        logger.error(f"call_medgemma: FAILED after {duration:.3f}s - {type(e).__name__}: {e}")
+        logger.error(f"call_medgemma: FAILED - {type(e).__name__}: {e}")
         return f"Error: {str(e)}"
 
 
@@ -700,41 +655,36 @@ def call_medgemma_stream(
     recent_history: list[dict] | None = None,
 ):
     """
-    Call MedGemma with streaming. Yields response chunks as they arrive.
-    Uses cached user context to avoid rebuilding on every call.
+    Call MedGemma with streaming via HF Inference API.
+    Yields response text chunks as they arrive.
     """
-    payload = _prepare_medgemma_request(prompt, context, chat_context, recent_history, stream=True)
+    messages = _build_medgemma_messages(prompt, context, chat_context, recent_history)
     try:
         start_time = time.time()
-        logger.debug("  Streaming mode enabled")
-        response = _http_session.post(
-            f"{Config.OLLAMA_BASE_URL}/api/generate",
-            json=payload,
+        client = _get_hf_client()
+        logger.debug("  HF streaming mode enabled")
+        stream = client.chat_completion(
+            messages=messages,
+            max_tokens=512,
+            temperature=0.2,
+            top_p=0.8,
+            stop=["Patient:", "=== USER PROFILE ===", "Note:", "Disclaimer:"],
             stream=True,
-            timeout=Config.OLLAMA_TIMEOUT,
         )
         chunk_count = 0
         total_chars = 0
-        for line in response.iter_lines():
-            if line:
-                chunk = json.loads(line)
-                if "response" in chunk:
-                    chunk_count += 1
-                    total_chars += len(chunk["response"])
-                    yield chunk["response"]
+        for chunk in stream:
+            if chunk.choices and chunk.choices[0].delta.content:
+                text = chunk.choices[0].delta.content
+                chunk_count += 1
+                total_chars += len(text)
+                yield text
         duration = time.time() - start_time
         logger.info(
             f"call_medgemma_stream: streamed {chunk_count} chunks, {total_chars} chars in {duration:.3f}s"
         )
-    except requests.exceptions.Timeout as e:
-        duration = time.time() - start_time
-        logger.error(f"call_medgemma_stream: TIMEOUT after {duration:.3f}s - {e}")
-        yield f"Error: Request timed out after {Config.OLLAMA_TIMEOUT}s"
     except Exception as e:
-        duration = time.time() - start_time
-        logger.error(
-            f"call_medgemma_stream: FAILED after {duration:.3f}s - {type(e).__name__}: {e}"
-        )
+        logger.error(f"call_medgemma_stream: FAILED - {type(e).__name__}: {e}")
         yield f"Error: {str(e)}"
 
 

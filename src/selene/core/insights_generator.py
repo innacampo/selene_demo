@@ -16,8 +16,6 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 
-import requests
-
 from selene import settings
 from selene.core.context_builder_multi_agent import build_complete_context, get_context_summary
 from selene.core.deterministic_analysis import (
@@ -27,11 +25,6 @@ from selene.core.deterministic_analysis import (
 )
 
 logger = logging.getLogger(__name__)
-
-# HTTP session with retries
-_http_session = requests.Session()
-adapter = requests.adapters.HTTPAdapter(max_retries=3)
-_http_session.mount("http://", adapter)
 
 
 @dataclass
@@ -266,7 +259,6 @@ def sanitize_user_input(text: str, max_length: int = 5000) -> str:
 
 
 def generate_insights_report(
-    ollama_base_url: str = settings.OLLAMA_BASE_URL,
     model: str = settings.LLM_MODEL,
     timeout: int = 240,
     save_full_report: bool = False,
@@ -432,20 +424,10 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
 {examples}
 """
 
-        # === 4. LLM call with retry logic ===
-        logger.info(f"Calling LLM ({model})")
+        # === 4. LLM call via HF Inference API with retry logic ===
+        logger.info(f"Calling LLM ({model}) via HF Inference API")
 
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "system": system_instruction,
-            "stream": False,
-            "options": {
-                "temperature": 0.3,  # Lower for more factual, precise output
-                "top_p": 0.9,
-                "repeat_penalty": 1.25,  # Reduce repetitive phrases
-            },
-        }
+        from selene.core.med_logic import _get_hf_client
 
         report_text = None
         last_error = None
@@ -456,21 +438,20 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
                     logger.info(f"Retry attempt {attempt}/{max_retries}")
                     time.sleep(2**attempt)  # Exponential backoff
 
-                response = _http_session.post(
-                    f"{ollama_base_url}/api/generate",
-                    json=payload,
-                    timeout=timeout,
+                client = _get_hf_client()
+                messages = [
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": prompt},
+                ]
+                response = client.chat_completion(
+                    messages=messages,
+                    max_tokens=1024,
+                    temperature=0.3,
+                    top_p=0.9,
                 )
 
-                if response.status_code != 200:
-                    last_error = f"LLM returned status {response.status_code}"
-                    if not retry_on_failure or attempt == max_retries:
-                        logger.error(last_error)
-                        return False, last_error, None
-                    continue
-
-                report_text = response.json().get("response", "")
-                if not report_text.strip():
+                report_text = response.choices[0].message.content
+                if not report_text or not report_text.strip():
                     last_error = "LLM returned empty response"
                     if not retry_on_failure or attempt == max_retries:
                         return False, last_error, None
@@ -482,15 +463,11 @@ Synthesize the statistics and user notes to create 3-5 specific, first-person qu
                 # Success!
                 break
 
-            except requests.exceptions.Timeout:
-                last_error = "LLM request timed out"
+            except Exception as e:
+                last_error = f"LLM call failed: {type(e).__name__}: {e}"
+                logger.error(last_error)
                 if not retry_on_failure or attempt == max_retries:
-                    return False, f"{last_error}. Try again or increase timeout.", None
-
-            except requests.exceptions.ConnectionError:
-                last_error = "Cannot connect to Ollama"
-                if not retry_on_failure or attempt == max_retries:
-                    return False, f"{last_error}. Is it running?", None
+                    return False, last_error, None
 
         if not report_text:
             return False, last_error or "Unknown error", None
@@ -594,15 +571,13 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="SELENE Insights Generator (Enhanced)")
-    parser.add_argument("--model", default=settings.LLM_MODEL, help="Model name")
-    parser.add_argument("--url", default=settings.OLLAMA_BASE_URL, help="Ollama URL")
+    parser.add_argument("--model", default=settings.LLM_MODEL, help="HF model ID")
     parser.add_argument("--days", type=int, default=30, help="Days to analyze")
     parser.add_argument("--no-retry", action="store_true", help="Disable retry on failure")
 
     args = parser.parse_args()
 
     success, report, metrics = generate_insights_report(
-        ollama_base_url=args.url,
         model=args.model,
         save_full_report=True,
         retry_on_failure=not args.no_retry,

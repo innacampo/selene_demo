@@ -4,15 +4,13 @@ Centralized Settings & Configuration for SELENE.
 Single source of truth for all configuration constants: paths, model
 identifiers, API endpoints, and tuning parameters. Import from here
 instead of hardcoding values across modules.
+
+Deployment modes:
+- HF Spaces:  Set HF_TOKEN as a Space secret. Model is called via HF Inference API.
+- Local:      Set HF_TOKEN as an environment variable (or in .env).
 """
 
 import os
-
-# Force libraries to only look for local files — must be set before
-# importing transformers, sentence_transformers, or huggingface_hub.
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
-os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
 from pathlib import Path
 
 # ============================================================================
@@ -43,12 +41,21 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CHROMA_TELEMETRY = False
 
 # ============================================================================
-# LLM / Ollama
+# LLM / Hugging Face Inference API
 # ============================================================================
 
-OLLAMA_BASE_URL = "http://localhost:11434"
-OLLAMA_TIMEOUT = 60
-LLM_MODEL = "MedAIBase/MedGemma1.5:4b"
+# HF_TOKEN is read from environment (set as a Space secret on HF Spaces,
+# or export HF_TOKEN=hf_... locally).
+HF_TOKEN: str | None = os.environ.get("HF_TOKEN")
+
+# Model repo on Hugging Face Hub
+HF_MODEL_ID = "google/medgemma-1.5-4b-it"
+
+# Request timeout for HF Inference API calls (seconds)
+HF_TIMEOUT = 120
+
+# Legacy alias kept so imports that reference LLM_MODEL still resolve.
+LLM_MODEL = HF_MODEL_ID
 
 # ============================================================================
 # RAG & Chat History Retrieval
@@ -72,16 +79,13 @@ MAX_CACHE_SIZE = 100
 # Logging / Observability
 # ============================================================================
 
-# Default log level for console and file handlers. Use 'DEBUG' for development,
-# 'INFO' for production.
-LOG_LEVEL = "DEBUG"
+# Default log level — 'INFO' for production / HF Spaces, 'DEBUG' for local dev.
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
-# Toggle file logging (rotating file handler). When True, logs are written to
-# LOG_FILE_PATH as a rotating log file with LOG_MAX_BYTES and LOG_BACKUP_COUNT.
-LOG_TO_FILE = True
+# Toggle file logging.  Disabled by default on HF Spaces (ephemeral filesystem).
+LOG_TO_FILE = os.environ.get("LOG_TO_FILE", "0") == "1"
 
-# Path to the log file. By default, logs will be stored in the *parent* directory's
-# 'logs' folder as 'selene.log'. You can change this to a full absolute path.
+# Path to the log file (only used when LOG_TO_FILE is True).
 LOG_FILE_PATH = str(PROJECT_ROOT.parent / "logs" / "selene.log")
 LOG_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 LOG_BACKUP_COUNT = 5

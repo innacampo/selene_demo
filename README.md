@@ -1,3 +1,18 @@
+---
+title: SELENE
+emoji: 🌙
+colorFrom: indigo
+colorTo: blue
+sdk: streamlit
+sdk_version: "1.45.1"
+app_file: app.py
+pinned: false
+license: cc-by-4.0
+short_description: Privacy-first menopause assistant powered by MedGemma
+models:
+  - google/medgemma-1.5-4b-it
+---
+
 # SELENE
 
 [![CI](https://github.com/innacampo/selene/actions/workflows/ci.yml/badge.svg)](https://github.com/innacampo/selene/actions/workflows/ci.yml)
@@ -5,11 +20,11 @@
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B.svg)](https://streamlit.io)
 
-> Privacy-first menopause assistant: local symptom tracking, RAG-backed chat, and clinician-style summaries powered by MedGemma.
+> Menopause assistant: symptom tracking, RAG-backed chat, and clinician-style summaries powered by [MedGemma](https://huggingface.co/google/medgemma-1.5-4b-it) on the Hugging Face Inference API.
 
 ## Overview
 
-- **Runs fully on-device**: user data stays under `data/user_data/`; LLM calls target a local Ollama endpoint.
+- **LLM backend**: calls `google/medgemma-1.5-4b-it` via the HF serverless Inference API (requires `HF_TOKEN`).
 - **Core flows**: Daily Attune logging, chat with RAG + safety guardrails, clinical insight reports with PDF export.
 
 ## Key Features
@@ -17,7 +32,7 @@
 - Chat: contextualized queries, Chroma RAG, past-session recall, streaming MedGemma responses.
 - Clinical summary: deterministic stats/patterns/risk + single MedGemma call; PDF export via xhtml2pdf.
 - Local knowledge base: Chroma collections (medical_docs, chat_history) with SentenceTransformer embeddings.
-- Safety: deterministic risk flags, conservative prompts, low temperature, offline defaults.
+- Safety: deterministic risk flags, conservative prompts, low temperature.
 
 ## Architecture (brief)
 - RAG + LLM orchestration: [med_logic.py](src/selene/core/med_logic.py)
@@ -31,10 +46,19 @@
 
 ## Prerequisites
 - Python 3.11+
-- Ollama running locally with model `MedAIBase/MedGemma1.5:4b` pulled
-- Basic build deps for scientific stack (numpy/scipy/pandas) and xhtml2pdf; install via requirements.txt
+- A Hugging Face token (`HF_TOKEN`) with access to `google/medgemma-1.5-4b-it`
+- Basic build deps for scientific stack (numpy/scipy) and xhtml2pdf; install via requirements.txt
 
 ## Quick Start
+
+### Deploy on Hugging Face Spaces (recommended)
+
+1. Create a new Space on [huggingface.co/new-space](https://huggingface.co/new-space) with **Streamlit** SDK.
+2. Push this repo to the Space.
+3. Add your `HF_TOKEN` as a **Space secret** (Settings → Repository secrets).
+4. The app will start automatically on port 7860.
+
+### Run locally
 
 ```bash
 # 1. Clone the repository
@@ -46,14 +70,12 @@ python3 -m venv med_env
 source med_env/bin/activate
 pip install -e ".[dev]"
 
-# 3. Pull model in Ollama (once)
-ollama pull MedAIBase/MedGemma1.5:4b
+# 3. Set your HF token
+export HF_TOKEN=hf_...
 
 # 4. Launch app
 streamlit run app.py
 ```
-
-Or use the setup script: `./scripts/setup_project.sh`
 
 ## Repository Structure
 
@@ -89,9 +111,9 @@ See [DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md) for the full tree.
 - Logs (if enabled): `../logs/selene.log` (rotating)
 
 ## Configuration Highlights
-- Paths, model names, cache TTLs in [settings.py](src/selene/settings.py): RAG_TOP_K=2, contextualize cache 300s, RAG cache 600s, user context cache 180s.
-- Offline/telemetry disabled by default via envs set in settings (TRANSFORMERS_OFFLINE, HF_*_OFFLINE, CHROMA_TELEMETRY=False).
-- Logging defaults to DEBUG; file logging enabled by default (toggle LOG_TO_FILE).
+- Paths, model ID, cache TTLs in [settings.py](src/selene/settings.py): RAG_TOP_K=2, contextualize cache 300s, RAG cache 600s, user context cache 180s.
+- HF_TOKEN read from environment; model defaults to `google/medgemma-1.5-4b-it`.
+- Logging defaults to INFO on Spaces; set `LOG_LEVEL=DEBUG` and `LOG_TO_FILE=1` for local development.
 
 ## Knowledge Base Management
 - Chroma collections live under `data/user_data/user_med_db`; embeddings via SentenceTransformer all-MiniLM-L6-v2.
