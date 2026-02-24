@@ -59,6 +59,7 @@ Thumbs.db
 # Local data and artifacts (user-specific, not shared)
 # ============================================================================
 data/user_data/
+!data/user_data/user_med_db/
 data/reports/
 data/models/
 logs/

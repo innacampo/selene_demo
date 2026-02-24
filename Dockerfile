@@ -23,9 +23,10 @@ ENV PYTHONPATH="/app/src"
 COPY app.py ./
 COPY .streamlit/ ./.streamlit/
 COPY data/metadata/ ./data/metadata/
+COPY data/user_data/user_med_db/ ./data/user_data/user_med_db/
 
 # Create writable directories for runtime data
-RUN mkdir -p data/user_data/backups data/user_data/user_med_db data/reports data/output
+RUN mkdir -p data/user_data/backups data/reports data/output
 
 EXPOSE 7860
 
